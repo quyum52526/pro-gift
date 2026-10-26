@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e9ee"/></radialGradient>
+<linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="840" rx="230" ry="22" fill="#1d1d1d" opacity=".12"/>
+<rect x="214" y="190" width="400" height="640" rx="18" fill="#e9e2d3"/>
+<rect x="200" y="180" width="400" height="640" rx="18" fill="#1f6f8b"/>
+<rect x="540" y="180" width="26" height="640" fill="#f6c649"/>
+<rect x="200" y="180" width="400" height="640" rx="18" fill="url(#shine)" opacity=".6"/>
+<text x="400" y="955" text-anchor="middle" font-family="Poppins, sans-serif" font-size="22" fill="#1d1d1d" fill-opacity=".35">Teal cover</text>
+</svg>

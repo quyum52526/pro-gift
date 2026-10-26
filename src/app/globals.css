@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/*
+ * Pro Gift brand tokens.
+ * Brand utilities: bg-ink, text-teal, bg-gold, text-gold-deep, bg-surface, bg-surface-tint.
+ * Semantic aliases (primary, secondary, muted, ...) map onto the brand palette so
+ * shadcn/ui primitives inherit the brand without extra styling.
+ */
+@theme {
+  --color-ink: #1d1d1d;
+  --color-teal: #1f6f8b;
+  --color-teal-dark: #175569;
+  --color-gold: #f6c649;
+  --color-gold-deep: #b9800f;
+  --color-surface: #ffffff;
+  --color-surface-tint: #edf4f6;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1da851;
+
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-ink);
+  --color-primary: var(--color-teal);
+  --color-primary-foreground: var(--color-surface);
+  --color-secondary: var(--color-surface-tint);
+  --color-secondary-foreground: var(--color-ink);
+  --color-accent: var(--color-surface-tint);
+  --color-accent-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-tint);
+  --color-muted-foreground: #5b6670;
+  --color-border: #d7e4e8;
+  --color-input: #d7e4e8;
+  --color-ring: var(--color-teal);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(29 29 29 / 0.04), 0 8px 24px -12px rgb(31 111 139 / 0.18);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+}
