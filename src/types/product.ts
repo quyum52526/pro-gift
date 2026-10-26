@@ -32,6 +32,8 @@ export interface ProductSpec {
 }
 
 export interface Product {
+  /** Database id; absent for products that never came from Supabase. */
+  id?: string;
   slug: string;
   code: string;
   name: string;

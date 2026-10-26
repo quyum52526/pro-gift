@@ -60,7 +60,8 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
     name: product.name,
     sku: product.code,
     description: product.description,
-    image: product.images.map((img) => `${SITE_URL}${img.src}`),
+    // Uploaded images are absolute Supabase URLs; bundled ones are site-relative.
+    image: product.images.map((img) => (img.src.startsWith("/") ? `${SITE_URL}${img.src}` : img.src)),
     brand: { "@type": "Brand", name: "Pro Gift" },
     offers: {
       "@type": "AggregateOffer",
