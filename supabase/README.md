@@ -21,6 +21,9 @@ It creates:
 
 The three launch products are seeded too, using the images in `public/products`.
 
+Then run [`migrations/20261028000000_pro_gift_dummy_products.sql`](migrations/20261028000000_pro_gift_dummy_products.sql)
+the same way. It adds 15 sample products so every category has at least three. Re-running it is safe: slugs that already exist are skipped.
+
 The migration runs in one transaction. If it fails part-way, nothing is created and it can be re-run.
 
 ## 2. Create an admin

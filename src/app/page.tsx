@@ -1,23 +1,22 @@
-import { getProducts } from "@/data/products";
-import { ProductCard } from "@/components/product/product-card";
+import { Suspense } from "react";
 
-// Placeholder catalogue page so product detail pages are reachable.
+import { getCategories, getProducts } from "@/data/products";
+import { CatalogGrid, CatalogGridSkeleton } from "@/components/product/catalog-grid";
+import { HomeHero } from "@/components/home/home-hero";
+import { ProductStrip } from "@/components/home/product-strip";
+
 export default async function Home() {
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-12 md:px-8">
-      <p className="text-sm font-medium text-gold-deep">Pro Gift</p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink md:text-4xl">
-        Premium corporate gifts
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">
-        Branded with your logo, delivered across Bangladesh. Request a quote on WhatsApp.
-      </p>
-      <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard key={product.slug} product={product} />
-        ))}
+    <main className="flex-1">
+      <HomeHero products={products} />
+      <ProductStrip products={products} />
+      <div id="catalog" className="mx-auto w-full max-w-[1200px] scroll-mt-4 px-6 pt-6 pb-16">
+        {/* Filtering happens on the client from ?category=, so switching categories is instant. */}
+        <Suspense fallback={<CatalogGridSkeleton />}>
+          <CatalogGrid products={products} categories={categories} />
+        </Suspense>
       </div>
     </main>
   );

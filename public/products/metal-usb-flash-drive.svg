@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#edf4f6"/></radialGradient>
+<linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="800" rx="240" ry="22" fill="#1d1d1d" opacity=".12"/>
+<rect x="300" y="300" width="200" height="420" rx="30" fill="#bfc9cd"/><rect x="300" y="300" width="200" height="420" rx="30" fill="url(#shine)"/><rect x="345" y="230" width="110" height="90" rx="8" fill="#e5ebed" stroke="#a9b4b8" stroke-width="4"/><circle cx="400" cy="660" r="20" fill="#eef3f4"/>
+<text x="400" y="955" text-anchor="middle" font-family="Poppins, sans-serif" font-size="22" fill="#1d1d1d" fill-opacity=".35">Metal USB Flash Drive 32 GB</text>
+</svg>

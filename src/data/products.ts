@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { rowToProduct } from "@/lib/catalog/map";
 import { PRODUCT_SELECT, type ProductRow } from "@/lib/catalog/types";
 import { createPublicClient } from "@/lib/supabase/server";
-import type { Product } from "@/types/product";
+import type { Product, ProductCategory } from "@/types/product";
 
 /** Tag on every cached catalogue read; admin actions call updateTag() with it. */
 export const PRODUCTS_CACHE_TAG = "products";
@@ -25,6 +25,22 @@ export async function getProducts(): Promise<Product[]> {
 
   if (error) throw new Error(`Failed to load products: ${error.message}`);
   return data.map(rowToProduct);
+}
+
+/** Categories in display order, for the header tabs and catalogue filter. */
+export async function getCategories(): Promise<ProductCategory[]> {
+  "use cache";
+  cacheTag(PRODUCTS_CACHE_TAG);
+  cacheLife("hours");
+
+  const { data, error } = await createPublicClient()
+    .from("categories")
+    .select("slug, name")
+    .order("sort_order", { ascending: true })
+    .overrideTypes<ProductCategory[], { merge: false }>();
+
+  if (error) throw new Error(`Failed to load categories: ${error.message}`);
+  return data;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {

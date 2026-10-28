@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#edf4f6"/></radialGradient>
+<linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="800" rx="240" ry="22" fill="#1d1d1d" opacity=".12"/>
+<ellipse cx="400" cy="600" rx="250" ry="90" fill="#dfe7ea"/><ellipse cx="400" cy="570" rx="250" ry="90" fill="#ffffff"/><ellipse cx="400" cy="570" rx="190" ry="66" fill="#e7eef0"/><ellipse cx="400" cy="640" rx="10" ry="4" fill="#1f6f8b"/><path d="M650 590 C 700 620, 700 700, 640 740" fill="none" stroke="#c8d3d7" stroke-width="10"/>
+<text x="400" y="955" text-anchor="middle" font-family="Poppins, sans-serif" font-size="22" fill="#1d1d1d" fill-opacity=".35">15 W Wireless Charging Pad</text>
+</svg>

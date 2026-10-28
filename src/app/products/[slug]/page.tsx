@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getProductBySlug, getProducts, getRelatedProducts } from "@/data/products";
+import { categoryHref } from "@/lib/catalog/category-filter";
 import { formatPriceRange } from "@/lib/utils";
 import { ProductDetailPage } from "@/components/product/product-detail-page";
 import { ProductCard } from "@/components/product/product-card";
@@ -84,8 +85,7 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
         productUrl={productUrl}
         breadcrumbs={[
           { label: "Home", href: "/" },
-          // TODO: point at /categories/[slug] once category pages exist.
-          { label: product.category.name, href: "/" },
+          { label: product.category.name, href: categoryHref(product.category.slug) },
           { label: product.name },
         ]}
       />

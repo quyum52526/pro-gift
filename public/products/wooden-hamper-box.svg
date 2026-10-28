@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+<defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#edf4f6"/></radialGradient>
+<linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<ellipse cx="400" cy="800" rx="240" ry="22" fill="#1d1d1d" opacity=".12"/>
+<rect x="140" y="420" width="520" height="320" rx="8" fill="#d6a86a"/><path d="M140 520 H660 M140 630 H660" stroke="#b98a4e" stroke-width="6"/><rect x="120" y="390" width="560" height="50" rx="6" fill="#c4935a"/><path d="M110 520 C 70 560, 70 620, 110 640 M690 520 C 730 560, 730 620, 690 640" fill="none" stroke="#8a6a44" stroke-width="12"/>
+<text x="400" y="955" text-anchor="middle" font-family="Poppins, sans-serif" font-size="22" fill="#1d1d1d" fill-opacity=".35">Wooden Hamper Box</text>
+</svg>

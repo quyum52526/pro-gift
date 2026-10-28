@@ -31,13 +31,18 @@ export interface ProductSpec {
   value: string;
 }
 
+export interface ProductCategory {
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   /** Database id; absent for products that never came from Supabase. */
   id?: string;
   slug: string;
   code: string;
   name: string;
-  category: { name: string; slug: string };
+  category: ProductCategory;
   shortDescription: string;
   description: string;
   priceRange: PriceRange;

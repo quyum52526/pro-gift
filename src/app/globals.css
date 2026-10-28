@@ -16,6 +16,8 @@
   --color-surface-tint: #edf4f6;
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1da851;
+  /* Ink at 14%: decorative dividers and card edges. */
+  --color-hairline: rgb(29 29 29 / 0.14);
 
   --color-background: var(--color-surface);
   --color-foreground: var(--color-ink);
@@ -39,6 +41,18 @@
 }
 
 @layer base {
+  /* Anchors land below the sticky header; --header-h is measured by components/layout/header-height.tsx. */
+  html {
+    scroll-padding-top: var(--header-h, 160px);
+  }
+
+  /* In-page links (#catalog, #top) glide; layout.tsx sets data-scroll-behavior so route changes still jump. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   *,
   ::before,
   ::after {
@@ -49,5 +63,566 @@
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+  }
+}
+
+/*
+ * 3D header, hero and footer effects, from the Claude Design canvas
+ * "Pro Gift — 3D Header, Hero & Footer". Pure CSS transforms; every
+ * pg- animation stops under prefers-reduced-motion (end of this file).
+ */
+@layer components {
+  /* ---------- header ---------- */
+  .pg-bar {
+    height: 6px;
+    background: linear-gradient(
+      100deg,
+      var(--color-gold) 0%,
+      var(--color-gold) 40%,
+      #fff1bd 50%,
+      var(--color-gold) 60%,
+      var(--color-gold) 100%
+    );
+    background-size: 300% 100%;
+    animation: pg-sheen 4.5s linear infinite;
+  }
+  .pg-head-in {
+    transform-origin: 50% 0;
+    animation: pg-headin 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pg-logo {
+    display: block;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation: pg-logoin 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+  }
+  .pg-logo:hover {
+    transform: perspective(600px) rotateY(-14deg) rotateX(6deg);
+  }
+
+  /* Pill that rolls over to its second face on hover or focus. */
+  .pg-roll {
+    display: inline-block;
+    height: 44px;
+    border-radius: 999px;
+    perspective: 700px;
+    animation: pg-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pg-roll:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 3px;
+  }
+  .pg-roll-in {
+    position: relative;
+    display: block;
+    height: 44px;
+    transform-style: preserve-3d;
+    transform: translateZ(-22px);
+    transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .pg-roll:hover .pg-roll-in,
+  .pg-roll:focus-visible .pg-roll-in {
+    transform: translateZ(-22px) rotateX(90deg);
+  }
+  .pg-rf {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    backface-visibility: hidden;
+  }
+  .pg-rf-a {
+    border: 1px solid var(--color-hairline);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    transform: translateZ(22px);
+  }
+  .pg-rf-b {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border: 1px solid var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-gold);
+    transform: rotateX(-90deg) translateZ(22px);
+  }
+  .pg-roll-on .pg-rf-a {
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
+  .pg-roll-on .pg-rf-b {
+    border-color: var(--color-teal);
+    background: var(--color-teal);
+    color: var(--color-surface);
+  }
+
+  /* ---------- 3D buttons ---------- */
+  .pg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 26px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .pg-btn:hover {
+    transform: perspective(500px) rotateX(12deg) translateY(-2px);
+  }
+  .pg-btn:active {
+    transform: translateY(4px);
+  }
+  .pg-btn:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 3px;
+  }
+  .pg-btn-teal {
+    background: var(--color-teal);
+    color: var(--color-surface);
+    box-shadow: 0 5px 0 var(--color-ink);
+  }
+  .pg-btn-line {
+    border: 2px solid var(--color-ink);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 5px 0 var(--color-ink);
+  }
+  .pg-btn-teal:hover,
+  .pg-btn-line:hover {
+    box-shadow: 0 8px 0 var(--color-ink);
+  }
+  .pg-btn-teal:active,
+  .pg-btn-line:active {
+    box-shadow: 0 1px 0 var(--color-ink);
+  }
+  .pg-btn-gold {
+    background: var(--color-gold);
+    color: var(--color-ink);
+    box-shadow: 0 5px 0 var(--color-gold-deep);
+  }
+  .pg-btn-gold:hover {
+    box-shadow: 0 8px 0 var(--color-gold-deep);
+  }
+  .pg-btn-gold:active {
+    box-shadow: 0 1px 0 var(--color-gold-deep);
+  }
+  .pg-btn-gold:focus-visible {
+    outline-color: var(--color-gold);
+  }
+
+  /* ---------- hero copy ---------- */
+  .pg-rise {
+    animation: pg-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pg-hl {
+    position: relative;
+    z-index: 0;
+    display: inline-block;
+  }
+  .pg-hl::before {
+    content: "";
+    position: absolute;
+    right: -8px;
+    bottom: 6px;
+    left: -8px;
+    z-index: -1;
+    height: 0.46em;
+    background: var(--color-gold);
+    transform: skewX(-8deg);
+    transform-origin: 0 50%;
+    animation: pg-hlgrow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.9s both;
+  }
+
+  /* ---------- hero 3D stage ---------- */
+  .pg-stage {
+    position: relative;
+    flex: none;
+    width: 560px;
+    height: 560px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: radial-gradient(circle at 50% 38%, var(--color-surface) 0, var(--color-surface-tint) 72%);
+    perspective: 1400px;
+  }
+  .pg-world {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.25s ease-out;
+  }
+  .pg-floor {
+    position: absolute;
+    top: -450px;
+    left: -450px;
+    width: 900px;
+    height: 900px;
+    background-image:
+      linear-gradient(rgb(31 111 139 / 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(31 111 139 / 0.22) 1px, transparent 1px);
+    background-size: 48px 48px;
+    transform: translate3d(0, 100px, 0) rotateX(90deg);
+    mask-image: radial-gradient(circle, #000 14%, transparent 62%);
+    animation: pg-gridmove 3s linear infinite;
+  }
+  .pg-glow {
+    position: absolute;
+    top: -170px;
+    left: -170px;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(31 111 139 / 0.34) 0, rgb(31 111 139 / 0) 68%);
+    transform: translate3d(0, 100.5px, 0) rotateX(90deg);
+  }
+  .pg-ring {
+    position: absolute;
+    top: -235px;
+    left: -235px;
+    width: 470px;
+    height: 470px;
+    border: 2px dashed rgb(31 111 139 / 0.5);
+    border-radius: 50%;
+    transform: translate3d(0, 100.5px, 0) rotateX(90deg);
+    animation: pg-ringspin 16s linear infinite;
+  }
+  .pg-ring i {
+    position: absolute;
+    left: 227px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  .pg-bob {
+    position: absolute;
+    transform-style: preserve-3d;
+    animation: pg-bob 3.2s ease-in-out infinite alternate;
+  }
+  .pg-rig {
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: rotateY(-24deg);
+    animation: pg-sway 7s ease-in-out infinite alternate;
+  }
+  .pg-bf {
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 200px;
+    height: 200px;
+  }
+  .pg-bf svg {
+    display: block;
+  }
+  .pg-bshade {
+    position: absolute;
+    inset: 0;
+  }
+  .pg-bfloor {
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle at 50% 50%, var(--color-teal) 0, var(--color-ink) 78%);
+    transform: translateY(100px) rotateX(90deg);
+  }
+  .pg-lid {
+    position: absolute;
+    transform-style: preserve-3d;
+    transform: translate3d(0, -125px, 0);
+    animation: pg-lid 8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+  .pg-lf {
+    --pg-shade: transparent;
+    position: absolute;
+    top: -25px;
+    left: -108px;
+    width: 216px;
+    height: 50px;
+    background-image:
+      linear-gradient(var(--pg-shade), var(--pg-shade)),
+      linear-gradient(
+        90deg,
+        var(--color-ink) 0,
+        var(--color-ink) 41%,
+        transparent 41%,
+        transparent 59%,
+        var(--color-ink) 59%,
+        var(--color-ink) 100%
+      ),
+      linear-gradient(90deg, var(--color-gold-deep) 41%, var(--color-gold) 50%, var(--color-gold-deep) 59%);
+  }
+  .pg-lt,
+  .pg-lu {
+    position: absolute;
+    top: -108px;
+    left: -108px;
+    width: 216px;
+    height: 216px;
+  }
+  .pg-lt {
+    background-image:
+      linear-gradient(90deg, transparent 41%, var(--color-gold) 41%, var(--color-gold) 59%, transparent 59%),
+      linear-gradient(180deg, transparent 41%, var(--color-gold) 41%, var(--color-gold) 59%, transparent 59%),
+      linear-gradient(var(--color-ink), var(--color-ink));
+    transform: rotateX(90deg) translateZ(25px);
+  }
+  .pg-lu {
+    background: var(--color-ink);
+    transform: rotateX(-90deg) translateZ(25px);
+  }
+  .pg-bow {
+    position: absolute;
+    transform-style: preserve-3d;
+    animation: pg-bowwig 8s ease-in-out infinite;
+  }
+  .pg-bp {
+    position: absolute;
+    top: -95px;
+    left: -60px;
+    width: 120px;
+    height: 70px;
+  }
+  .pg-bp svg {
+    display: block;
+  }
+  .pg-kn {
+    position: absolute;
+    top: -38px;
+    left: -13px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--color-gold), var(--color-gold-deep));
+  }
+  .pg-spark {
+    position: absolute;
+    top: -105px;
+    left: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--color-gold);
+    opacity: 0;
+    transform: rotate(45deg);
+    animation: pg-spark 8s ease-out infinite;
+  }
+  .pg-spark-teal {
+    background: var(--color-teal);
+  }
+  .pg-pcards {
+    pointer-events: none;
+    transition: transform 0.25s ease-out;
+  }
+  .pg-pcard {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 190px;
+    padding: 10px;
+    border: 1px solid var(--color-hairline);
+    border-radius: 8px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    animation: pg-floaty 4.4s ease-in-out infinite alternate;
+  }
+
+  /* ---------- product strip ---------- */
+  .pg-pstrip {
+    display: flex;
+    width: max-content;
+    /* ~50px/s across a ~2880px half-track */
+    animation: pg-mq 56s linear infinite;
+  }
+  .pg-pstrip:hover,
+  .pg-pstrip:focus-within {
+    animation-play-state: paused;
+  }
+  .pg-pitem {
+    display: block;
+    flex: none;
+    width: 104px;
+    border-radius: 12px;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .pg-pitem:hover {
+    transform: perspective(600px) rotateY(-10deg) rotateX(4deg) translateY(-4px);
+  }
+  .pg-pitem:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 3px;
+  }
+  .pg-pimg {
+    width: 104px;
+    height: 104px;
+    border: 1px solid var(--color-hairline);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+
+  /* ---------- footer ---------- */
+  .pg-coin {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 160px;
+    height: 160px;
+    transform-style: preserve-3d;
+    animation: pg-coin 7s linear infinite;
+  }
+  .pg-coin-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+  .pg-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 84px;
+    padding: 14px 16px;
+    overflow-wrap: anywhere;
+    border-radius: 8px;
+    background: var(--color-teal);
+    color: var(--color-surface);
+    box-shadow: 0 6px 0 var(--color-gold);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .pg-tile:hover {
+    transform: perspective(700px) rotateX(10deg) rotateY(-8deg) translateY(-4px);
+    box-shadow: 0 11px 0 var(--color-gold);
+  }
+  .pg-tile:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--color-gold);
+  }
+  .pg-flink {
+    display: inline-block;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-surface);
+    transition:
+      transform 0.25s ease,
+      color 0.25s ease;
+  }
+  .pg-flink:hover {
+    color: var(--color-gold);
+    transform: perspective(500px) rotateY(-10deg) translateX(6px);
+  }
+  .pg-footer a:focus-visible,
+  .pg-footer button:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 640px) {
+    /* The design uses 0.62; 0.55 keeps the 560px stage inside a 360px screen's gutters. */
+    .pg-stage {
+      zoom: 0.55;
+    }
+    .pg-pitem,
+    .pg-pimg {
+      width: 88px;
+    }
+    .pg-pimg {
+      height: 88px;
+    }
+  }
+}
+
+@keyframes pg-sheen {
+  from { background-position: 100% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes pg-headin {
+  from { opacity: 0; transform: perspective(1000px) rotateX(-75deg) translateY(-24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pg-logoin {
+  from { opacity: 0; transform: perspective(600px) rotateY(-85deg); }
+  to { opacity: 1; transform: perspective(600px) rotateY(0); }
+}
+@keyframes pg-rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pg-hlgrow {
+  from { transform: skewX(-8deg) scaleX(0); }
+  to { transform: skewX(-8deg) scaleX(1); }
+}
+@keyframes pg-gridmove {
+  from { background-position: 0 0; }
+  to { background-position: 0 48px; }
+}
+@keyframes pg-ringspin {
+  from { transform: translate3d(0, 100.5px, 0) rotateX(90deg) rotateZ(0deg); }
+  to { transform: translate3d(0, 100.5px, 0) rotateX(90deg) rotateZ(360deg); }
+}
+@keyframes pg-bob {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -14px, 0); }
+}
+@keyframes pg-sway {
+  from { transform: rotateY(-34deg); }
+  to { transform: rotateY(34deg); }
+}
+@keyframes pg-lid {
+  0%, 34% { transform: translate3d(0, -125px, 0) rotateZ(0deg); }
+  50%, 70% { transform: translate3d(0, -235px, 0) rotateZ(-5deg); }
+  86%, 100% { transform: translate3d(0, -125px, 0) rotateZ(0deg); }
+}
+@keyframes pg-bowwig {
+  0%, 34% { transform: rotateY(0deg); }
+  60% { transform: rotateY(40deg); }
+  86%, 100% { transform: rotateY(0deg); }
+}
+@keyframes pg-spark {
+  0%, 36% { opacity: 0; transform: translate3d(0, 0, 0) rotate(45deg) scale(0.4); }
+  48% { opacity: 1; }
+  82% { opacity: 0; transform: translate3d(var(--x), -190px, var(--z)) rotate(225deg) scale(1); }
+  100% { opacity: 0; }
+}
+@keyframes pg-floaty {
+  from { transform: translateY(0); }
+  to { transform: translateY(-12px); }
+}
+@keyframes pg-mq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes pg-coin {
+  from { transform: rotateX(-12deg) rotateY(0deg); }
+  to { transform: rotateX(-12deg) rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="pg-"],
+  [class*="pg-"]::before,
+  [class*="pg-"]::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

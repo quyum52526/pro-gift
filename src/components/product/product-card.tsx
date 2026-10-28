@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: Product }) {
                 src={cover.src}
                 alt={cover.alt}
                 fill
-                sizes="(min-width: 768px) 25vw, 50vw"
+                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <span className="absolute inset-x-3 bottom-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-ink/80 py-1.5 text-xs font-medium text-surface opacity-0 backdrop-blur transition group-hover:opacity-100 group-focus-within:opacity-100">
