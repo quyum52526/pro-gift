@@ -1,7 +1,25 @@
 import type { NextConfig } from "next";
 
-// Uploaded product images are served from the Supabase Storage public bucket.
+type RemotePattern = Exclude<NonNullable<NonNullable<NextConfig["images"]>["remotePatterns"]>[number], URL>;
+
+// Uploaded product images are served from Supabase Storage public buckets.
+// The host comes from the env so it always matches the project the app talks to.
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+function supabaseImagePatterns(): RemotePattern[] {
+  if (!supabaseUrl) {
+    console.warn("[next.config] NEXT_PUBLIC_SUPABASE_URL is not set: Supabase images will be blocked by next/image.");
+    return [];
+  }
+  const { protocol, hostname } = new URL(supabaseUrl);
+  return [
+    {
+      protocol: protocol.replace(":", "") as "https" | "http",
+      hostname,
+      pathname: "/storage/v1/object/public/**",
+    },
+  ];
+}
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -9,9 +27,7 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   reactCompiler: true,
   images: {
-    remotePatterns: supabaseUrl
-      ? [new URL(`${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/product-images/**`)]
-      : [],
+    remotePatterns: supabaseImagePatterns(),
   },
   experimental: {
     serverActions: {
