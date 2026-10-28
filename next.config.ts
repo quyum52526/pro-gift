@@ -1,14 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   experimental: {
-    cacheComponents: true,
+    // any experimental features if needed
+  },
+  serverActions: {
+    bodySizeLimit: '5mb',
   },
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "nxqmgcekrtgzgykwffty.supabase.co",
+        hostname: "nxqmgcekrtgzgykwftty.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
     ],
