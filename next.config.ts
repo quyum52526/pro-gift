@@ -27,7 +27,16 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   reactCompiler: true,
   images: {
-    remotePatterns: supabaseImagePatterns(),
+    remotePatterns: [
+      // Requested entry, kept as given. Note: this host does not resolve; the live
+      // project is the NEXT_PUBLIC_SUPABASE_URL host ("...gykwftty"), allowed below.
+      {
+        protocol: "https",
+        hostname: "nxqmgcekrtgzgykwffty.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      ...supabaseImagePatterns(),
+    ],
   },
   experimental: {
     serverActions: {
