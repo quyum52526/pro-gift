@@ -1,3 +1,4 @@
+import { formatBDT } from "@/lib/utils";
 import type { Product } from "@/types/product";
 
 /** Business number in international format, digits only (e.g. 8801XXXXXXXXX). */
@@ -45,6 +46,28 @@ export function buildQuickInquiryUrl(product: Pick<Product, "name" | "code">): s
     `Hi, I am interested in ${product.name} (Code: ${product.code}). Please share the quotation.`,
   );
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+}
+
+export interface GiftBoxOrder {
+  boxName: string;
+  boxPrice: number;
+  lines: { name: string; quantity: number; total: number }[];
+  total: number;
+  withLogo: boolean;
+}
+
+/** Full custom gift box order, sent from the gift box checkout. */
+export function buildGiftBoxWhatsAppUrl(order: GiftBoxOrder): string {
+  const lines = [
+    "Hello Pro Gift! I'd like to order this custom gift box:",
+    "",
+    `Box: ${order.boxName} (${formatBDT(order.boxPrice)})`,
+    ...order.lines.map((line) => `${line.name} x ${line.quantity}: ${formatBDT(line.total)}`),
+    `Total: ${formatBDT(order.total)}`,
+  ];
+  if (order.withLogo) lines.push("Branding: I'll share my logo file in this chat.");
+  lines.push("", "Please confirm pricing and delivery time. Thank you!");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
 export function buildWhatsAppUrl(

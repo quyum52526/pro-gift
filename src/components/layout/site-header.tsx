@@ -37,14 +37,20 @@ export async function SiteHeader() {
               className="block h-10 w-auto sm:h-12"
             />
           </Link>
-          <a
-            href={buildGeneralWhatsAppUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pg-btn pg-btn-teal shrink-0 px-4 sm:px-[26px]"
-          >
-            Talk to us
-          </a>
+          <div className="flex shrink-0 items-center gap-3">
+            {/* No room beside the logo on phones; the home page band links here instead. */}
+            <Link href="/gift-box" className="pg-btn pg-btn-line hidden md:inline-flex">
+              Build a gift box
+            </Link>
+            <a
+              href={buildGeneralWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pg-btn pg-btn-teal px-4 sm:px-[26px]"
+            >
+              Talk to us
+            </a>
+          </div>
         </div>
         {categories.length > 0 && (
           <Suspense fallback={<CategoryTabsFallback categories={categories} />}>
