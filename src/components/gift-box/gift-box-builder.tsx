@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GIFT_BOXES, GIFT_ITEMS, summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
@@ -166,6 +167,12 @@ export function GiftBoxBuilder() {
                 Add at least one product to continue.
               </p>
             )}
+            <Link href="/#catalog" className="pg-btn pg-btn-line mt-4 w-full">
+              <ArrowLeft className="h-4 w-4" aria-hidden /> Continue shopping
+            </Link>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Your box stays saved while you browse.
+            </p>
           </section>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import { summarizeGiftBox } from "@/lib/gift-box/catalog";
@@ -19,9 +19,14 @@ export function GiftBoxCheckout() {
       <div className="mx-auto w-full max-w-[1200px] px-4 py-16 text-center sm:px-6">
         <h1 className="text-2xl font-bold text-ink">Your gift box is empty</h1>
         <p className="mt-2 text-muted-foreground">Add at least one product before checking out.</p>
-        <Link href="/gift-box" className="pg-btn pg-btn-teal mt-6">
-          Build a gift box
-        </Link>
+        <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link href="/gift-box" className="pg-btn pg-btn-teal">
+            Build a gift box
+          </Link>
+          <Link href="/#catalog" className="pg-btn pg-btn-line">
+            Continue shopping
+          </Link>
+        </div>
       </div>
     );
   }
@@ -90,6 +95,17 @@ export function GiftBoxCheckout() {
           <p className="mt-3 text-xs text-muted-foreground">
             We confirm the final price and delivery time on WhatsApp.
             {config.logo && " Please attach your logo file to the chat, as it can't be sent automatically."}
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Link href="/gift-box" className="pg-btn pg-btn-line">
+              <Pencil className="h-4 w-4" aria-hidden /> Edit box
+            </Link>
+            <Link href="/#catalog" className="pg-btn pg-btn-line">
+              <ArrowLeft className="h-4 w-4" aria-hidden /> Continue shopping
+            </Link>
+          </div>
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Your box stays saved while you browse.
           </p>
         </section>
       </div>
