@@ -8,7 +8,7 @@ import { summarizeGiftBox } from "@/lib/gift-box/catalog";
 import { useGiftBoxConfig } from "@/lib/gift-box/store";
 import { formatBDT } from "@/lib/utils";
 import { buildGiftBoxWhatsAppUrl } from "@/lib/whatsapp";
-import { GiftBoxPreview } from "./gift-box-preview";
+import { GiftBoxPreviewPanel } from "./gift-box-preview";
 
 export function GiftBoxCheckout() {
   const config = useGiftBoxConfig();
@@ -49,9 +49,7 @@ export function GiftBoxCheckout() {
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Checkout</h1>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-start">
-        <div className="overflow-hidden rounded-2xl border bg-surface-tint/60 p-2">
-          <GiftBoxPreview config={config} className="block h-auto w-full" />
-        </div>
+        <GiftBoxPreviewPanel config={config} />
 
         <section aria-labelledby="order-heading" className="rounded-2xl border bg-surface p-5 shadow-card">
           <h2 id="order-heading" className="font-semibold text-ink">

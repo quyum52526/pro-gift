@@ -13,7 +13,7 @@ import {
   useGiftBoxConfig,
 } from "@/lib/gift-box/store";
 import { cn, formatBDT } from "@/lib/utils";
-import { GiftBoxPreview, GiftItemThumbnail } from "./gift-box-preview";
+import { GiftBoxPreviewPanel, GiftItemThumbnail } from "./gift-box-preview";
 
 const ACCEPTED_TYPES = ["image/png", "image/svg+xml", "image/jpeg", "image/webp"];
 // Base64 adds about a third, and the data URL has to fit in sessionStorage.
@@ -129,9 +129,7 @@ export function GiftBoxBuilder() {
 
         {/* Flattened on phones so the preview leads the page and the summary follows the steps. */}
         <div className="contents lg:sticky lg:top-[calc(var(--header-h,160px)+1rem)] lg:block lg:min-w-0 lg:space-y-4">
-          <div className="order-first min-w-0 overflow-hidden rounded-2xl border bg-surface-tint/60 p-2 lg:order-none">
-            <GiftBoxPreview config={config} className="block h-auto w-full" />
-          </div>
+          <GiftBoxPreviewPanel config={config} className="order-first min-w-0 lg:order-none" />
 
           <section aria-labelledby="summary-heading" className="rounded-2xl border bg-surface p-5 shadow-card">
             <h2 id="summary-heading" className="font-semibold text-ink">
