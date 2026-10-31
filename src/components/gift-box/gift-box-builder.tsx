@@ -202,32 +202,22 @@ function GiftItemCard({ item, quantity, isFull, logoUrl }: GiftItemCardProps) {
       className={cn(
         "flex flex-col rounded-xl border-2 bg-surface p-3 transition",
         quantity > 0 ? "border-teal" : "border-border",
-        !isFull && "hover:border-teal",
       )}
     >
-      <button
-        type="button"
-        disabled={isFull}
-        onClick={() => changeGiftItemQuantity(item.id, 1)}
-        aria-label={`Add ${item.name}, ${formatBDT(item.price)}. ${quantity} in box.`}
-        className={cn(
-          "flex flex-1 flex-col justify-start rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          isFull && "cursor-not-allowed opacity-60",
-        )}
-      >
-        <span className="block aspect-square rounded-lg bg-surface-tint/60 p-2">
+      <div className="flex-1">
+        <div className="aspect-square rounded-lg bg-surface-tint/60 p-2">
           <GiftItemThumbnail id={item.id} logoUrl={logoUrl} />
-        </span>
-        <span className="mt-2 block font-semibold text-ink">{item.name}</span>
-        <span className="block text-xs text-muted-foreground">{item.description}</span>
-      </button>
-      {/* Outside the disabled area: a full box must still let customers take items out. */}
+        </div>
+        <h3 className="mt-2 font-semibold text-ink">{item.name}</h3>
+        <p className="text-xs text-muted-foreground">{item.description}</p>
+      </div>
       <div className="mt-2 space-y-1.5">
         <span className="block font-semibold text-teal">{formatBDT(item.price)}</span>
         {/* Own row, so the card keeps its layout as the minus button comes and goes. */}
         <span className="flex items-center justify-end gap-1">
           {quantity > 0 && (
             <>
+              {/* Never disabled: a full box must still let customers take items out to swap them. */}
               <Button
                 variant="outline"
                 size="icon"
