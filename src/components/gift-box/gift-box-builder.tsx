@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { GIFT_BOXES, GIFT_ITEMS, summarizeGiftBox } from "@/lib/gift-box/catalog";
+import { GIFT_BOXES, GIFT_ITEMS, summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
 import {
   changeGiftItemQuantity,
   selectGiftBox,
@@ -80,39 +81,16 @@ export function GiftBoxBuilder() {
                 {itemCount} of {box.capacity} added
               </p>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-              {GIFT_ITEMS.map((item) => {
-                const quantity = config.items[item.id] ?? 0;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    disabled={isFull}
-                    onClick={() => changeGiftItemQuantity(item.id, 1)}
-                    aria-label={`Add ${item.name}, ${formatBDT(item.price)}. ${quantity} in box.`}
-                    className={cn(
-                      "group relative rounded-xl border-2 bg-surface p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      quantity > 0 ? "border-teal" : "border-border",
-                      isFull ? "cursor-not-allowed opacity-60" : "hover:border-teal",
-                    )}
-                  >
-                    {quantity > 0 && (
-                      <span className="absolute top-2 right-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-teal px-1.5 text-xs font-semibold text-surface tabular-nums">
-                        {quantity}
-                      </span>
-                    )}
-                    <span className="block aspect-square rounded-lg bg-surface-tint/60 p-2">
-                      <GiftItemThumbnail id={item.id} logoUrl={logoUrl} />
-                    </span>
-                    <span className="mt-2 block font-semibold text-ink">{item.name}</span>
-                    <span className="block text-xs text-muted-foreground">{item.description}</span>
-                    <span className="mt-2 flex items-center justify-between">
-                      <span className="font-semibold text-teal">{formatBDT(item.price)}</span>
-                      <Plus className="h-4 w-4 text-teal" aria-hidden />
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+              {GIFT_ITEMS.map((item) => (
+                <GiftItemCard
+                  key={item.id}
+                  item={item}
+                  quantity={config.items[item.id] ?? 0}
+                  isFull={isFull}
+                  logoUrl={logoUrl}
+                />
+              ))}
             </div>
             {isFull && (
               <p className="mt-3 text-sm text-gold-deep">
@@ -190,6 +168,83 @@ export function GiftBoxBuilder() {
             )}
           </section>
         </div>
+      </div>
+    </div>
+  );
+}
+
+interface GiftItemCardProps {
+  item: GiftItem;
+  quantity: number;
+  isFull: boolean;
+  logoUrl?: string;
+}
+
+function GiftItemCard({ item, quantity, isFull, logoUrl }: GiftItemCardProps) {
+  const addRef = React.useRef<HTMLButtonElement>(null);
+
+  const removeOne = () => {
+    // The minus button disappears at zero, so keyboard focus moves to the add button.
+    // flushSync first: the add button is still disabled until a full box has re-rendered.
+    flushSync(() => changeGiftItemQuantity(item.id, -1));
+    if (quantity === 1) addRef.current?.focus();
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-xl border-2 bg-surface p-3 transition",
+        quantity > 0 ? "border-teal" : "border-border",
+        !isFull && "hover:border-teal",
+      )}
+    >
+      <button
+        type="button"
+        disabled={isFull}
+        onClick={() => changeGiftItemQuantity(item.id, 1)}
+        aria-label={`Add ${item.name}, ${formatBDT(item.price)}. ${quantity} in box.`}
+        className={cn(
+          "flex flex-1 flex-col justify-start rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          isFull && "cursor-not-allowed opacity-60",
+        )}
+      >
+        <span className="block aspect-square rounded-lg bg-surface-tint/60 p-2">
+          <GiftItemThumbnail id={item.id} logoUrl={logoUrl} />
+        </span>
+        <span className="mt-2 block font-semibold text-ink">{item.name}</span>
+        <span className="block text-xs text-muted-foreground">{item.description}</span>
+      </button>
+      {/* Outside the disabled area: a full box must still let customers take items out. */}
+      <div className="mt-2 space-y-1.5">
+        <span className="block font-semibold text-teal">{formatBDT(item.price)}</span>
+        {/* Own row, so the card keeps its layout as the minus button comes and goes. */}
+        <span className="flex items-center justify-end gap-1">
+          {quantity > 0 && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                aria-label={`Remove one ${item.name}`}
+                onClick={removeOne}
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-6 text-center text-sm tabular-nums">{quantity}</span>
+            </>
+          )}
+          <Button
+            ref={addRef}
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={isFull}
+            aria-label={`Add one ${item.name}`}
+            onClick={() => changeGiftItemQuantity(item.id, 1)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </span>
       </div>
     </div>
   );
