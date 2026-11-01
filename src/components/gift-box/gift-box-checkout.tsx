@@ -4,15 +4,15 @@ import Link from "next/link";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
-import { summarizeGiftBox } from "@/lib/gift-box/catalog";
+import { summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
 import { useGiftBoxConfig } from "@/lib/gift-box/store";
 import { formatBDT } from "@/lib/utils";
 import { buildGiftBoxWhatsAppUrl } from "@/lib/whatsapp";
 import { GiftBoxPreviewPanel } from "./gift-box-preview";
 
-export function GiftBoxCheckout() {
-  const config = useGiftBoxConfig();
-  const { box, lines, itemCount, total } = summarizeGiftBox(config);
+export function GiftBoxCheckout({ catalogue }: { catalogue: GiftItem[] }) {
+  const config = useGiftBoxConfig(catalogue);
+  const { box, lines, itemCount, total } = summarizeGiftBox(config, catalogue);
 
   if (itemCount === 0) {
     return (
@@ -36,6 +36,7 @@ export function GiftBoxCheckout() {
     boxPrice: box.price,
     lines: lines.map(({ item, quantity, total: lineTotal }) => ({
       name: item.name,
+      code: item.code,
       quantity,
       total: lineTotal,
     })),
@@ -54,7 +55,7 @@ export function GiftBoxCheckout() {
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Checkout</h1>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-start">
-        <GiftBoxPreviewPanel config={config} />
+        <GiftBoxPreviewPanel config={config} catalogue={catalogue} />
 
         <section aria-labelledby="order-heading" className="rounded-2xl border bg-surface p-5 shadow-card">
           <h2 id="order-heading" className="font-semibold text-ink">
@@ -67,10 +68,10 @@ export function GiftBoxCheckout() {
             </li>
             {lines.map(({ item, quantity, total: lineTotal }) => (
               <li key={item.id} className="flex justify-between gap-3 py-2">
-                <span>
+                <span className="min-w-0">
                   {item.name} × {quantity}
                 </span>
-                <span className="tabular-nums">{formatBDT(lineTotal)}</span>
+                <span className="shrink-0 tabular-nums">{formatBDT(lineTotal)}</span>
               </li>
             ))}
             <li className="flex justify-between gap-3 py-2">
@@ -81,7 +82,7 @@ export function GiftBoxCheckout() {
             </li>
           </ul>
           <div className="mt-2 flex items-baseline justify-between border-t pt-3">
-            <span className="font-semibold text-ink">Total</span>
+            <span className="font-semibold text-ink">Estimated total</span>
             <span className="text-2xl font-bold text-teal tabular-nums">{formatBDT(total)}</span>
           </div>
           <a
@@ -93,7 +94,7 @@ export function GiftBoxCheckout() {
             <WhatsAppIcon className="h-5 w-5" /> Place order on WhatsApp
           </a>
           <p className="mt-3 text-xs text-muted-foreground">
-            We confirm the final price and delivery time on WhatsApp.
+            Based on starting prices. We confirm the final price, minimum order and delivery time on WhatsApp.
             {config.logo && " Please attach your logo file to the chat, as it can't be sent automatically."}
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">

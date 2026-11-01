@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { saveProduct } from "@/app/admin/products/actions";
 import { Button } from "@/components/ui/button";
 import { IDLE_STATE } from "@/lib/admin/form-state";
+import { generateProductCode } from "@/lib/catalog/product-code";
 import type { CategoryRow, ProductRow } from "@/lib/catalog/types";
 import { Field, FormSection, controlClass, errorProps } from "./field";
 import { ImageUploader } from "./image-uploader";
@@ -18,12 +19,22 @@ interface ProductFormProps {
   product?: ProductRow;
   /** Pre-selected category for new products. */
   defaultCategoryId?: string;
+  /** Codes already in use, so a generated code for a new product is unique. */
+  existingCodes?: string[];
 }
 
-export function ProductForm({ categories, product, defaultCategoryId }: ProductFormProps) {
+export function ProductForm({ categories, product, defaultCategoryId, existingCodes = [] }: ProductFormProps) {
   const [state, formAction, pending] = React.useActionState(saveProduct, IDLE_STATE);
   const [uploading, setUploading] = React.useState(false);
+  const [name, setName] = React.useState(product?.name ?? "");
+  const [categoryId, setCategoryId] = React.useState(product?.category_id ?? defaultCategoryId ?? "");
+  // Null means the code follows the name and category. Saved products start with their
+  // own code, because customers already see it and it must not change by itself.
+  const [manualCode, setManualCode] = React.useState<string | null>(product?.code ?? null);
   const errors = state.fieldErrors ?? {};
+
+  const category = categories.find((option) => option.id === categoryId);
+  const code = manualCode ?? (category ? generateProductCode(category, name, existingCodes) : "");
 
   // Submitting through startTransition (not the `action` prop) skips React's
   // automatic form reset, so typed values survive a validation error.
@@ -50,7 +61,8 @@ export function ProductForm({ categories, product, defaultCategoryId }: ProductF
               id="name"
               name="name"
               required
-              defaultValue={product?.name}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
               placeholder="Executive Ceramic Mug"
               className={controlClass}
               {...errorProps("name", errors.name)}
@@ -61,7 +73,8 @@ export function ProductForm({ categories, product, defaultCategoryId }: ProductF
               id="category_id"
               name="category_id"
               required
-              defaultValue={product?.category_id ?? defaultCategoryId ?? ""}
+              value={categoryId}
+              onChange={(event) => setCategoryId(event.target.value)}
               className={controlClass}
               {...errorProps("category_id", errors.category_id)}
             >
@@ -75,17 +88,36 @@ export function ProductForm({ categories, product, defaultCategoryId }: ProductF
               ))}
             </select>
           </Field>
-          <Field label="Product code" htmlFor="code" error={errors.code} hint="Shown to customers, e.g. PG-MUG-101.">
+          <Field
+            label="Product code"
+            htmlFor="code"
+            error={errors.code}
+            hint={
+              product
+                ? "Shown to customers, e.g. PG-MUG-101."
+                : "Filled in from the name and category. Shown to customers; you can edit it."
+            }
+          >
             <input
               id="code"
               name="code"
               required
-              defaultValue={product?.code}
+              value={code}
+              onChange={(event) => setManualCode(event.target.value)}
               placeholder="PG-XXX-000"
               autoCapitalize="characters"
               className={`${controlClass} font-mono uppercase`}
               {...errorProps("code", errors.code)}
             />
+            {!product && manualCode !== null && (
+              <button
+                type="button"
+                onClick={() => setManualCode(null)}
+                className="self-start text-xs font-medium text-teal hover:text-teal-dark"
+              >
+                Use generated code
+              </button>
+            )}
           </Field>
           <Field
             label="Short description"
@@ -172,6 +204,23 @@ export function ProductForm({ categories, product, defaultCategoryId }: ProductF
             />
           </Field>
         </div>
+      </FormSection>
+
+      <FormSection title="Gift box builder" description="Offer this product inside custom gift boxes.">
+        <label className="flex items-start gap-3 text-sm text-ink">
+          <input
+            type="checkbox"
+            name="is_gift_box_item"
+            defaultChecked={product?.is_gift_box_item ?? false}
+            className="mt-0.5 h-4 w-4 accent-teal"
+          />
+          <span>
+            <span className="font-medium">Show in gift box builder</span>
+            <span className="block text-xs text-muted-foreground">
+              Uses this product&apos;s name, first image and minimum price. It stays in the main catalogue either way.
+            </span>
+          </span>
+        </label>
       </FormSection>
 
       <FormSection title="Specifications" description="Shown as a table on the product page.">

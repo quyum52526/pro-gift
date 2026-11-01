@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { GIFT_BOXES, GIFT_ITEMS, summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
+import { GIFT_BOXES, summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
 import {
   changeGiftItemQuantity,
   selectGiftBox,
@@ -21,10 +21,10 @@ const ACCEPTED_TYPES = ["image/png", "image/svg+xml", "image/jpeg", "image/webp"
 // Base64 adds about a third, and the data URL has to fit in sessionStorage.
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
-export function GiftBoxBuilder() {
+export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
   const router = useRouter();
-  const config = useGiftBoxConfig();
-  const { box, lines, itemCount, total } = summarizeGiftBox(config);
+  const config = useGiftBoxConfig(catalogue);
+  const { box, lines, itemCount, total } = summarizeGiftBox(config, catalogue);
   const isFull = itemCount >= box.capacity;
   const logoUrl = config.logo?.dataUrl;
 
@@ -82,17 +82,23 @@ export function GiftBoxBuilder() {
                 {itemCount} of {box.capacity} added
               </p>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-              {GIFT_ITEMS.map((item) => (
-                <GiftItemCard
-                  key={item.id}
-                  item={item}
-                  quantity={config.items[item.id] ?? 0}
-                  isFull={isFull}
-                  logoUrl={logoUrl}
-                />
-              ))}
-            </div>
+            {catalogue.length === 0 ? (
+              <p className="mt-3 rounded-xl border bg-surface-tint/60 p-6 text-center text-sm text-muted-foreground">
+                Products for custom gift boxes are coming soon. Message us on WhatsApp and we&apos;ll build one for you.
+              </p>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                {catalogue.map((item) => (
+                  <GiftItemCard
+                    key={item.id}
+                    item={item}
+                    quantity={config.items[item.id] ?? 0}
+                    isFull={isFull}
+                    logoUrl={logoUrl}
+                  />
+                ))}
+              </div>
+            )}
             {isFull && (
               <p className="mt-3 text-sm text-gold-deep">
                 This box is full. Remove a product or choose a larger box to add more.
@@ -108,7 +114,7 @@ export function GiftBoxBuilder() {
 
         {/* Flattened on phones so the preview leads the page and the summary follows the steps. */}
         <div className="contents lg:sticky lg:top-[calc(var(--header-h,160px)+1rem)] lg:block lg:min-w-0 lg:space-y-4">
-          <GiftBoxPreviewPanel config={config} className="order-first min-w-0 lg:order-none" />
+          <GiftBoxPreviewPanel config={config} catalogue={catalogue} className="order-first min-w-0 lg:order-none" />
 
           <section aria-labelledby="summary-heading" className="rounded-2xl border bg-surface p-5 shadow-card">
             <h2 id="summary-heading" className="font-semibold text-ink">
@@ -149,11 +155,14 @@ export function GiftBoxBuilder() {
               ))}
             </ul>
             <div className="mt-2 flex items-baseline justify-between border-t pt-3">
-              <span className="font-semibold text-ink">Total</span>
+              <span className="font-semibold text-ink">Estimated total</span>
               <span className="text-2xl font-bold text-teal tabular-nums" aria-live="polite">
                 {formatBDT(total)}
               </span>
             </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Based on starting prices. The final price depends on quantity and branding.
+            </p>
             <button
               type="button"
               disabled={itemCount === 0}
@@ -205,14 +214,16 @@ function GiftItemCard({ item, quantity, isFull, logoUrl }: GiftItemCardProps) {
       )}
     >
       <div className="flex-1">
-        <div className="aspect-square rounded-lg bg-surface-tint/60 p-2">
-          <GiftItemThumbnail id={item.id} logoUrl={logoUrl} />
-        </div>
+        <GiftItemThumbnail item={item} logoUrl={logoUrl} />
         <h3 className="mt-2 font-semibold text-ink">{item.name}</h3>
-        <p className="text-xs text-muted-foreground">{item.description}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
+        {item.moq > 1 && <p className="mt-1 text-xs text-muted-foreground">Min. order {item.moq} pcs</p>}
       </div>
       <div className="mt-2 space-y-1.5">
-        <span className="block font-semibold text-teal">{formatBDT(item.price)}</span>
+        <span className="block font-semibold text-teal">
+          <span className="text-xs font-normal text-muted-foreground">From </span>
+          {formatBDT(item.price)}
+        </span>
         {/* Own row, so the card keeps its layout as the minus button comes and goes. */}
         <span className="flex items-center justify-end gap-1">
           {quantity > 0 && (

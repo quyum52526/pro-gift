@@ -51,7 +51,7 @@ export function buildQuickInquiryUrl(product: Pick<Product, "name" | "code">): s
 export interface GiftBoxOrder {
   boxName: string;
   boxPrice: number;
-  lines: { name: string; quantity: number; total: number }[];
+  lines: { name: string; code: string; quantity: number; total: number }[];
   total: number;
   withLogo: boolean;
 }
@@ -62,8 +62,8 @@ export function buildGiftBoxWhatsAppUrl(order: GiftBoxOrder): string {
     "Hello Pro Gift! I'd like to order this custom gift box:",
     "",
     `Box: ${order.boxName} (${formatBDT(order.boxPrice)})`,
-    ...order.lines.map((line) => `${line.name} x ${line.quantity}: ${formatBDT(line.total)}`),
-    `Total: ${formatBDT(order.total)}`,
+    ...order.lines.map((line) => `${line.name} (${line.code}) x ${line.quantity}: from ${formatBDT(line.total)}`),
+    `Estimated total: from ${formatBDT(order.total)}`,
   ];
   if (order.withLogo) lines.push("Branding: I'll share my logo file in this chat.");
   lines.push("", "Please confirm pricing and delivery time. Thank you!");

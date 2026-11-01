@@ -33,6 +33,7 @@ export interface ProductRow {
   specs: ProductSpec[];
   branding_methods: string[];
   images: StoredImage[];
+  is_gift_box_item: boolean;
   created_at: string;
   updated_at: string;
   category: Pick<CategoryRow, "id" | "slug" | "name" | "sort_order"> | null;

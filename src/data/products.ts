@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { rowToProduct } from "@/lib/catalog/map";
+import { productToGiftItem, type GiftItem } from "@/lib/gift-box/catalog";
 import { PRODUCT_SELECT, type ProductRow } from "@/lib/catalog/types";
 import { createPublicClient } from "@/lib/supabase/server";
 import type { Product, ProductCategory } from "@/types/product";
@@ -25,6 +26,12 @@ export async function getProducts(): Promise<Product[]> {
 
   if (error) throw new Error(`Failed to load products: ${error.message}`);
   return data.map(rowToProduct);
+}
+
+/** Products admins have switched on for the builder. Shares getProducts' cache, so saves show up at once. */
+export async function getGiftBoxItems(): Promise<GiftItem[]> {
+  const products = await getProducts();
+  return products.filter((product) => product.isGiftBoxItem && product.images.length > 0).map(productToGiftItem);
 }
 
 /** Categories in display order, for the header tabs and catalogue filter. */

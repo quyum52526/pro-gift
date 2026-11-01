@@ -25,6 +25,12 @@ export async function listProducts({ supabase }: AdminSession): Promise<ProductR
   return data;
 }
 
+export async function listProductCodes({ supabase }: AdminSession): Promise<string[]> {
+  const { data, error } = await supabase.from("products").select("code");
+  if (error) throw new Error(`Failed to load product codes: ${error.message}`);
+  return data.map((row: { code: string }) => row.code);
+}
+
 export async function getProductById({ supabase }: AdminSession, id: string): Promise<ProductRow | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const { data, error } = await supabase

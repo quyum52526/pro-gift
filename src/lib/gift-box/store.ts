@@ -1,15 +1,14 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import {
   DEFAULT_GIFT_BOX_CONFIG,
   GIFT_BOXES,
-  GIFT_ITEMS,
   countGiftItems,
   getGiftBox,
   type GiftBoxConfig,
   type GiftBoxId,
   type GiftBoxLogo,
-  type GiftItemId,
+  type GiftItem,
 } from "./catalog";
 
 const CONFIG_KEY = "pro-gift:gift-box";
@@ -36,8 +35,7 @@ function parseConfig(raw: string | null, logo: GiftBoxLogo | null): GiftBoxConfi
 
   const items: GiftBoxConfig["items"] = {};
   let remaining = box.capacity;
-  for (const { id } of GIFT_ITEMS) {
-    const quantity = value?.items?.[id];
+  for (const [id, quantity] of Object.entries(value?.items ?? {})) {
     if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) continue;
     const allowed = Math.min(quantity, remaining);
     if (allowed > 0) items[id] = allowed;
@@ -98,7 +96,7 @@ export function selectGiftBox(boxId: GiftBoxId) {
   update({ ...config, boxId });
 }
 
-export function changeGiftItemQuantity(id: GiftItemId, delta: number) {
+export function changeGiftItemQuantity(id: string, delta: number) {
   const config = getSnapshot();
   const room = getGiftBox(config.boxId).capacity - countGiftItems(config.items);
   if (delta > room) return;
@@ -114,6 +112,19 @@ export function setGiftBoxLogo(logo: GiftBoxLogo | null) {
   update({ ...getSnapshot(), logo });
 }
 
-export function useGiftBoxConfig(): GiftBoxConfig {
+function pruneGiftItems(catalogue: readonly GiftItem[]) {
+  const config = getSnapshot();
+  const available = new Set(catalogue.map((item) => item.id));
+  const kept = Object.entries(config.items).filter(([id]) => available.has(id));
+  if (kept.length < Object.keys(config.items).length) {
+    update({ ...config, items: Object.fromEntries(kept) });
+  }
+}
+
+/** Reads the box, dropping products no longer offered so they can't hold capacity invisibly. */
+export function useGiftBoxConfig(catalogue?: readonly GiftItem[]): GiftBoxConfig {
+  useEffect(() => {
+    if (catalogue) pruneGiftItems(catalogue);
+  }, [catalogue]);
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

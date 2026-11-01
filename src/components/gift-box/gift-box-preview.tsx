@@ -1,17 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Package, PackageOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  GIFT_ITEMS,
-  getGiftBox,
-  type GiftBox,
-  type GiftBoxConfig,
-  type GiftItemId,
-} from "@/lib/gift-box/catalog";
+import { getGiftBox, type GiftBox, type GiftBoxConfig, type GiftItem } from "@/lib/gift-box/catalog";
 import { cn } from "@/lib/utils";
+import type { PrintArea } from "@/types/product";
 
 const VIEW_WIDTH = 640;
 const VIEW_HEIGHT = 470;
@@ -25,131 +21,91 @@ const BACK_INSET = 36;
 const SINGLE_ROW_Y = 272;
 const FRONT_ROW_Y = 283;
 const BACK_ROW_Y = 244;
-const MAX_ITEMS_IN_SINGLE_ROW = 3;
-const MAX_SCALE_SINGLE_ROW = 1;
-const MAX_SCALE_TWO_ROWS = 0.85;
+const MAX_ITEMS_IN_SINGLE_ROW = 4;
+const MAX_SCALE_SINGLE_ROW = 1.1;
+const MAX_SCALE_TWO_ROWS = 0.7;
 const ROW_MARGIN = 24;
 const FOAM_COLOR = "#6b7278";
 const LID_FRONT_Y = 250;
 const LID_BACK_Y = 130;
 const LID_OVERHANG = 8;
+/** Product photos are shown square, as on the catalogue cards. */
+const TILE_SIZE = 120;
+const CUTOUT = { rx: 68, ry: 12 };
+/** Where the logo goes on photos with no print area marked, which includes every admin upload. */
+const FALLBACK_PRINT_AREA: PrintArea = { x: 30, y: 32, width: 40, height: 36 };
 
-interface PrintArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  /** Quarter turn for tall, narrow surfaces such as a pen barrel. */
-  rotate?: boolean;
+function printAreaOf(item: GiftItem): PrintArea {
+  return item.image.printArea ?? FALLBACK_PRINT_AREA;
 }
 
-interface ItemArt {
-  width: number;
-  height: number;
-  print: PrintArea;
-  /** Half-size of the hole this item sits in; `square` for flat-based items. */
-  cutout: { rx: number; ry: number; square?: boolean };
-  /** Drawn with the base at the origin, growing upward. */
-  body: React.ReactNode;
+/** A single product photo with the logo on it, for the product grid. */
+export function GiftItemThumbnail({ item, logoUrl }: { item: GiftItem; logoUrl?: string }) {
+  const area = printAreaOf(item);
+  return (
+    <div className="relative aspect-square overflow-hidden rounded-lg bg-surface-tint">
+      <Image
+        src={item.image.src}
+        alt={item.image.alt}
+        fill
+        sizes="(min-width: 1280px) 180px, (min-width: 768px) 25vw, 50vw"
+        className="object-cover"
+      />
+      {logoUrl && (
+        <div
+          className="pointer-events-none absolute flex items-center justify-center"
+          style={{
+            left: `${area.x}%`,
+            top: `${area.y}%`,
+            width: `${area.width}%`,
+            height: `${area.height}%`,
+          }}
+        >
+          {/* A local data URL, which next/image cannot optimise. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoUrl} alt="" className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+    </div>
+  );
 }
 
-const OUTLINE = { stroke: "var(--color-hairline)", strokeWidth: 1.5 };
-
-const ITEM_ART: Record<GiftItemId, ItemArt> = {
-  mug: {
-    width: 124,
-    height: 110,
-    print: { x: -34, y: -96, width: 68, height: 62 },
-    cutout: { rx: 54, ry: 15 },
-    body: (
-      <>
-        <path
-          d="M42 -88 h14 a18 18 0 0 1 18 18 v14 a18 18 0 0 1 -18 18 h-14"
-          fill="none"
-          stroke="var(--color-surface-tint)"
-          strokeWidth="10"
-        />
-        <rect x="-42" y="-110" width="84" height="110" rx="8" fill="var(--color-surface)" {...OUTLINE} />
-        <ellipse cx="0" cy="-108" rx="38" ry="4" fill="var(--color-border)" />
-      </>
-    ),
-  },
-  bottle: {
-    width: 58,
-    height: 190,
-    print: { x: -22, y: -112, width: 44, height: 52 },
-    cutout: { rx: 38, ry: 12 },
-    body: (
-      <>
-        <rect x="-11" y="-168" width="22" height="30" fill="var(--color-border)" {...OUTLINE} />
-        <rect x="-14" y="-190" width="28" height="26" rx="4" fill="var(--color-teal-dark)" />
-        <rect x="-27" y="-146" width="54" height="146" rx="13" fill="var(--color-surface-tint)" {...OUTLINE} />
-      </>
-    ),
-  },
-  pen: {
-    width: 22,
-    height: 170,
-    print: { x: -36, y: -91, width: 72, height: 12, rotate: true },
-    cutout: { rx: 18, ry: 8 },
-    body: (
-      <>
-        <path d="M0 0 L-8 -22 H8 Z" fill="var(--color-border)" {...OUTLINE} />
-        <rect x="-9" y="-160" width="18" height="138" rx="3" fill="var(--color-surface)" {...OUTLINE} />
-        <rect x="-9" y="-170" width="18" height="24" rx="4" fill="var(--color-gold-deep)" />
-        <rect x="7" y="-168" width="3" height="42" rx="1.5" fill="var(--color-gold-deep)" />
-      </>
-    ),
-  },
-  notebook: {
-    width: 112,
-    height: 150,
-    print: { x: -32, y: -128, width: 76, height: 80 },
-    cutout: { rx: 66, ry: 12, square: true },
-    body: (
-      <>
-        <rect x="-56" y="-150" width="112" height="150" rx="6" fill="var(--color-gold)" {...OUTLINE} />
-        <rect x="-56" y="-150" width="14" height="150" rx="4" fill="var(--color-gold-deep)" />
-        <rect x="44" y="-150" width="4" height="150" fill="var(--color-gold-deep)" />
-      </>
-    ),
-  },
-};
-
-function ArtWithLogo({ id, logoUrl }: { id: GiftItemId; logoUrl?: string }) {
-  const { body, print } = ITEM_ART[id];
-  const rotation = print.rotate
-    ? `rotate(-90 ${print.x + print.width / 2} ${print.y + print.height / 2})`
-    : undefined;
+/** The product's photo drawn standing up, with its base at the origin. */
+function ItemTile({ item, logoUrl }: { item: GiftItem; logoUrl?: string }) {
+  const clipId = `tile-${React.useId().replace(/\W/g, "")}`;
+  const area = printAreaOf(item);
+  const left = -TILE_SIZE / 2;
+  const top = -TILE_SIZE;
+  const frame = { x: left, y: top, width: TILE_SIZE, height: TILE_SIZE, rx: 8 };
   return (
     <>
-      {body}
+      <defs>
+        <clipPath id={clipId}>
+          <rect {...frame} />
+        </clipPath>
+      </defs>
+      <rect {...frame} fill="var(--color-surface)" />
+      <image
+        href={item.image.src}
+        x={left}
+        y={top}
+        width={TILE_SIZE}
+        height={TILE_SIZE}
+        clipPath={`url(#${clipId})`}
+        preserveAspectRatio="xMidYMid slice"
+      />
+      <rect {...frame} fill="none" stroke="var(--color-hairline)" strokeWidth="1.5" />
       {logoUrl && (
         <image
           href={logoUrl}
-          x={print.x}
-          y={print.y}
-          width={print.width}
-          height={print.height}
-          transform={rotation}
+          x={left + (area.x / 100) * TILE_SIZE}
+          y={top + (area.y / 100) * TILE_SIZE}
+          width={(area.width / 100) * TILE_SIZE}
+          height={(area.height / 100) * TILE_SIZE}
           preserveAspectRatio="xMidYMid meet"
         />
       )}
     </>
-  );
-}
-
-/** A single product on its own, for the product grid. */
-export function GiftItemThumbnail({ id, logoUrl }: { id: GiftItemId; logoUrl?: string }) {
-  const { height } = ITEM_ART[id];
-  // Square frame around the tallest item, so every product keeps its true proportions.
-  const frame = 200;
-  return (
-    <svg viewBox={`${-frame / 2} ${-frame + 5} ${frame} ${frame}`} className="h-full w-full" aria-hidden>
-      <g transform={`translate(0 ${-(frame - 10 - height) / 2})`}>
-        <ArtWithLogo id={id} logoUrl={logoUrl} />
-      </g>
-    </svg>
   );
 }
 
@@ -158,54 +114,46 @@ function insetAt(y: number) {
   return (BACK_INSET * (WALL_TOP_Y - y)) / (WALL_TOP_Y - FLOOR_BACK_Y);
 }
 
-/** One row up to three items, then two rows with the tallest at the back so nothing is hidden. */
-function placeItems(items: GiftBoxConfig["items"], boxWidth: number) {
-  const pieces = GIFT_ITEMS.flatMap((item) =>
-    Array.from({ length: items[item.id] ?? 0 }, (_, index) => ({ id: item.id, key: `${item.id}-${index}` })),
-  ).sort((a, b) => ITEM_ART[b.id].height - ITEM_ART[a.id].height);
-  if (pieces.length === 0) return [];
-
-  const backCount = Math.ceil(pieces.length / 2);
-  const rows =
-    pieces.length > MAX_ITEMS_IN_SINGLE_ROW
-      ? [
-          { pieces: pieces.slice(0, backCount), y: BACK_ROW_Y },
-          { pieces: pieces.slice(backCount), y: FRONT_ROW_Y },
-        ]
-      : [{ pieces, y: SINGLE_ROW_Y }];
-  const rowWidth = (y: number) => boxWidth - ROW_MARGIN * 2 - insetAt(y) * 2;
-  const widest = Math.max(...pieces.map((piece) => ITEM_ART[piece.id].width));
-  // One scale for every item keeps a pen smaller than a mug, whatever else is in the box.
-  const scale = Math.min(
-    rows.length > 1 ? MAX_SCALE_TWO_ROWS : MAX_SCALE_SINGLE_ROW,
-    ...rows.map((row) => (rowWidth(row.y) / row.pieces.length - 6) / widest),
+/** One row up to four items; five go three behind two, with the front row in the gaps. */
+function placeItems(config: GiftBoxConfig, catalogue: readonly GiftItem[], boxWidth: number) {
+  const pieces = catalogue.flatMap((item) =>
+    Array.from({ length: config.items[item.id] ?? 0 }, (_, index) => ({ item, key: `${item.id}-${index}` })),
   );
-
-  return rows.flatMap((row) => {
-    const width = rowWidth(row.y);
-    const cell = width / row.pieces.length;
-    return row.pieces.map((piece, index) => ({
+  if (pieces.length === 0) return [];
+  const rowWidth = (y: number) => boxWidth - ROW_MARGIN * 2 - insetAt(y) * 2;
+  const scaleFor = (cell: number, limit: number) => Math.min(limit, (cell - 6) / TILE_SIZE);
+  const row = (rowPieces: typeof pieces, y: number, cell: number, scale: number) =>
+    rowPieces.map((piece, index) => ({
       ...piece,
-      x: CENTER_X - width / 2 + cell * (index + 0.5),
-      y: row.y,
+      x: CENTER_X + cell * (index - (rowPieces.length - 1) / 2),
+      y,
       scale,
     }));
-  });
+
+  if (pieces.length <= MAX_ITEMS_IN_SINGLE_ROW) {
+    const cell = rowWidth(SINGLE_ROW_Y) / pieces.length;
+    return row(pieces, SINGLE_ROW_Y, cell, scaleFor(cell, MAX_SCALE_SINGLE_ROW));
+  }
+  const backCount = Math.ceil(pieces.length / 2);
+  const cell = rowWidth(BACK_ROW_Y) / backCount;
+  const scale = scaleFor(cell, MAX_SCALE_TWO_ROWS);
+  return [
+    ...row(pieces.slice(0, backCount), BACK_ROW_Y, cell, scale),
+    ...row(pieces.slice(backCount), FRONT_ROW_Y, cell, scale),
+  ];
 }
 
-function Cutout({ id }: { id: GiftItemId }) {
-  const { rx, ry, square } = ITEM_ART[id].cutout;
-  const hole = { fill: "#000", fillOpacity: 0.8, stroke: "#fff", strokeOpacity: 0.4, strokeWidth: 2 };
-  return square ? (
-    <rect x={-rx} y={-ry} width={rx * 2} height={ry * 2} rx="3" {...hole} />
-  ) : (
-    <ellipse rx={rx} ry={ry} {...hole} />
-  );
-}
-
-function OpenBox({ box, config }: { box: GiftBox; config: GiftBoxConfig }) {
+function OpenBox({
+  box,
+  config,
+  catalogue,
+}: {
+  box: GiftBox;
+  config: GiftBoxConfig;
+  catalogue: readonly GiftItem[];
+}) {
   const foamPatternId = `foam-${React.useId().replace(/\W/g, "")}`;
-  const placed = placeItems(config.items, box.previewWidth);
+  const placed = placeItems(config, catalogue, box.previewWidth);
   const logoUrl = config.logo?.dataUrl;
 
   const left = CENTER_X - box.previewWidth / 2;
@@ -251,14 +199,25 @@ function OpenBox({ box, config }: { box: GiftBox; config: GiftBoxConfig }) {
       {/* Every hole goes down first, so no item is ever covered by a neighbour's cutout. */}
       {placed.map((piece) => (
         <g key={piece.key} transform={`translate(${piece.x} ${piece.y}) scale(${piece.scale})`}>
-          <Cutout id={piece.id} />
+          <rect
+            x={-CUTOUT.rx}
+            y={-CUTOUT.ry}
+            width={CUTOUT.rx * 2}
+            height={CUTOUT.ry * 2}
+            rx="3"
+            fill="#000"
+            fillOpacity="0.8"
+            stroke="#fff"
+            strokeOpacity="0.4"
+            strokeWidth="2"
+          />
         </g>
       ))}
       {placed.map((piece) => (
         <g key={piece.key} transform={`translate(${piece.x} ${piece.y}) scale(${piece.scale})`}>
           {/* Inner group: the entrance animation's transform must not replace the placement above. */}
           <g className="pg-rise">
-            <ArtWithLogo id={piece.id} logoUrl={logoUrl} />
+            <ItemTile item={piece.item} logoUrl={logoUrl} />
           </g>
         </g>
       ))}
@@ -390,17 +349,18 @@ function ClosedBox({ box, logoUrl }: { box: GiftBox; logoUrl?: string }) {
 
 interface GiftBoxPreviewProps {
   config: GiftBoxConfig;
+  catalogue: readonly GiftItem[];
   closed?: boolean;
   className?: string;
 }
 
-export function GiftBoxPreview({ config, closed = false, className }: GiftBoxPreviewProps) {
+export function GiftBoxPreview({ config, catalogue, closed = false, className }: GiftBoxPreviewProps) {
   const box = getGiftBox(config.boxId);
   const logoUrl = config.logo?.dataUrl;
 
-  const itemNames = GIFT_ITEMS.filter((item) => config.items[item.id]).map(
-    (item) => `${config.items[item.id]} ${item.name}`,
-  );
+  const itemNames = catalogue
+    .filter((item) => config.items[item.id])
+    .map((item) => `${config.items[item.id]} ${item.name}`);
   const label = closed
     ? `Closed ${box.name} with a ribbon and bow${logoUrl ? ", with your logo on the lid" : ""}.`
     : `${box.name} preview${itemNames.length ? ` with foam cutouts holding ${itemNames.join(", ")}` : ", empty"}${
@@ -417,13 +377,21 @@ export function GiftBoxPreview({ config, closed = false, className }: GiftBoxPre
         fill="var(--color-teal)"
         opacity="0.16"
       />
-      {closed ? <ClosedBox box={box} logoUrl={logoUrl} /> : <OpenBox box={box} config={config} />}
+      {closed ? <ClosedBox box={box} logoUrl={logoUrl} /> : <OpenBox box={box} config={config} catalogue={catalogue} />}
     </svg>
   );
 }
 
 /** The preview with its open/close control. */
-export function GiftBoxPreviewPanel({ config, className }: { config: GiftBoxConfig; className?: string }) {
+export function GiftBoxPreviewPanel({
+  config,
+  catalogue,
+  className,
+}: {
+  config: GiftBoxConfig;
+  catalogue: readonly GiftItem[];
+  className?: string;
+}) {
   // Remembers which contents were closed, so changing them reopens the box to show the change.
   const contents = JSON.stringify(config.items);
   const [closedContents, setClosedContents] = React.useState<string | null>(null);
@@ -431,7 +399,7 @@ export function GiftBoxPreviewPanel({ config, className }: { config: GiftBoxConf
 
   return (
     <div className={cn("relative overflow-hidden rounded-2xl border bg-surface-tint/60 p-2", className)}>
-      <GiftBoxPreview config={config} closed={closed} className="block h-auto w-full" />
+      <GiftBoxPreview config={config} catalogue={catalogue} closed={closed} className="block h-auto w-full" />
       <Button
         variant="outline"
         size="sm"

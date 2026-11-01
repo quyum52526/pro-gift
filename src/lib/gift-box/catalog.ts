@@ -1,5 +1,6 @@
+import type { Product, ProductImage } from "@/types/product";
+
 export type GiftBoxId = "classic" | "premium" | "executive";
-export type GiftItemId = "mug" | "bottle" | "pen" | "notebook";
 
 export interface GiftBox {
   id: GiftBoxId;
@@ -15,12 +16,17 @@ export interface GiftBox {
   accentColor: string;
 }
 
+/** A catalogue product as the builder uses it. */
 export interface GiftItem {
-  id: GiftItemId;
+  /** The product's database id. */
+  id: string;
+  code: string;
   name: string;
   description: string;
-  /** Price per piece in taka. */
+  /** Starting price per piece in taka: the product's minimum. */
   price: number;
+  moq: number;
+  image: ProductImage;
 }
 
 export interface GiftBoxLogo {
@@ -31,7 +37,8 @@ export interface GiftBoxLogo {
 
 export interface GiftBoxConfig {
   boxId: GiftBoxId;
-  items: Partial<Record<GiftItemId, number>>;
+  /** Quantity per product id. Prices are never stored, so they always come from the catalogue. */
+  items: Record<string, number>;
   logo: GiftBoxLogo | null;
 }
 
@@ -68,38 +75,45 @@ export const GIFT_BOXES: readonly GiftBox[] = [
   },
 ];
 
-export const GIFT_ITEMS: readonly GiftItem[] = [
-  { id: "mug", name: "Mug", description: "Ceramic, 350 ml", price: 450 },
-  { id: "bottle", name: "Bottle", description: "Steel, 500 ml", price: 750 },
-  { id: "pen", name: "Pen", description: "Metal ballpoint", price: 150 },
-  { id: "notebook", name: "Notebook", description: "A5 hardcover", price: 400 },
-];
-
 export const DEFAULT_GIFT_BOX_CONFIG: GiftBoxConfig = {
   boxId: "classic",
   items: {},
   logo: null,
 };
 
+export function productToGiftItem(product: Product): GiftItem {
+  return {
+    id: product.id ?? product.slug,
+    code: product.code,
+    name: product.name,
+    description: product.shortDescription,
+    price: product.priceRange.min,
+    moq: product.moq,
+    image: product.images[0],
+  };
+}
+
 export function getGiftBox(id: GiftBoxId): GiftBox {
   return GIFT_BOXES.find((box) => box.id === id) ?? GIFT_BOXES[0];
 }
 
 export function countGiftItems(items: GiftBoxConfig["items"]): number {
-  return GIFT_ITEMS.reduce((count, item) => count + (items[item.id] ?? 0), 0);
+  return Object.values(items).reduce((count, quantity) => count + quantity, 0);
 }
 
-/** Always priced from this catalogue, so an edited browser store cannot change a total. */
-export function summarizeGiftBox({ boxId, items }: GiftBoxConfig) {
+/** Always priced from the current catalogue, so an edited browser store cannot change a total. */
+export function summarizeGiftBox({ boxId, items }: GiftBoxConfig, catalogue: readonly GiftItem[]) {
   const box = getGiftBox(boxId);
-  const lines = GIFT_ITEMS.filter((item) => (items[item.id] ?? 0) > 0).map((item) => {
-    const quantity = items[item.id] ?? 0;
-    return { item, quantity, total: item.price * quantity };
-  });
+  const lines = catalogue
+    .filter((item) => (items[item.id] ?? 0) > 0)
+    .map((item) => {
+      const quantity = items[item.id] ?? 0;
+      return { item, quantity, total: item.price * quantity };
+    });
   return {
     box,
     lines,
-    itemCount: countGiftItems(items),
+    itemCount: lines.reduce((count, line) => count + line.quantity, 0),
     total: box.price + lines.reduce((sum, line) => sum + line.total, 0),
   };
 }
