@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { rowToProduct } from "@/lib/catalog/map";
-import { productToGiftItem, type GiftItem } from "@/lib/gift-box/catalog";
+import { isPackagingCategory, productToGiftItem, type GiftItem } from "@/lib/gift-box/catalog";
 import { PRODUCT_SELECT, type ProductRow } from "@/lib/catalog/types";
 import { createPublicClient } from "@/lib/supabase/server";
 import type { Product, ProductCategory } from "@/types/product";
@@ -28,10 +28,12 @@ export async function getProducts(): Promise<Product[]> {
   return data.map(rowToProduct);
 }
 
-/** Every catalogue product with a photo to show. Shares getProducts' cache, so saves show up at once. */
+/** Catalogue products that can go in a gift box and have a photo. Shares getProducts' cache, so saves show up at once. */
 export async function getGiftBoxItems(): Promise<GiftItem[]> {
   const products = await getProducts();
-  return products.filter((product) => product.images.length > 0).map(productToGiftItem);
+  return products
+    .filter((product) => product.images.length > 0 && !isPackagingCategory(product.category))
+    .map(productToGiftItem);
 }
 
 /** Categories in display order, for the header tabs and catalogue filter. */

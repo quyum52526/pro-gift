@@ -95,7 +95,15 @@ export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUpl
       return next;
     });
 
+  const setCover = (key: string) =>
+    setItems((current) => [
+      ...current.filter((item) => item.key === key),
+      ...current.filter((item) => item.key !== key),
+    ]);
+
   const ready = items.filter((item) => item.status === "ready");
+  // Failed and uploading images aren't saved, so the cover is the first one that is.
+  const coverKey = ready[0]?.key;
   const serialised = JSON.stringify(
     ready.map(({ src, alt, path, printArea }) => ({ src, alt, path, printArea })),
   );
@@ -147,10 +155,27 @@ export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUpl
                     {item.error}
                   </span>
                 )}
-                {index === 0 && item.status === "ready" && (
-                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[11px] font-semibold text-ink">
-                    <Star className="h-3 w-3" aria-hidden /> Cover
-                  </span>
+                {item.status === "ready" && (
+                  <button
+                    type="button"
+                    aria-pressed={item.key === coverKey}
+                    onClick={() => setCover(item.key)}
+                    className={cn(
+                      "absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                      item.key === coverKey ? "cursor-default" : "transition hover:bg-ink/10",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "absolute left-2 top-2 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold text-ink",
+                        item.key === coverKey ? "bg-gold" : "bg-surface/90 shadow-sm",
+                      )}
+                    >
+                      <Star className={cn("h-3 w-3", item.key === coverKey && "fill-current")} aria-hidden />
+                      {item.key === coverKey ? "Cover" : "Set as cover"}
+                      <span className="sr-only">, image {index + 1}</span>
+                    </span>
+                  </button>
                 )}
                 <div className="absolute right-2 top-2 flex gap-1">
                   <IconButton label="Remove image" onClick={() => remove(item)} disabled={item.status === "uploading"}>
@@ -208,7 +233,7 @@ export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUpl
           <ImagePlus className="h-6 w-6 text-teal" aria-hidden />
           <span className="text-sm font-medium text-ink">Click or drop images to upload</span>
           <span className="text-xs text-muted-foreground">
-            JPG, PNG, WebP or AVIF · max 4 MB each · up to {MAX_IMAGES} · first image is the cover
+            JPG, PNG, WebP or AVIF · max 4 MB each · up to {MAX_IMAGES} · click an image to make it the cover
           </span>
         </button>
       )}

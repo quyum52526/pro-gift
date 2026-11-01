@@ -1,4 +1,4 @@
-import type { Product, ProductImage } from "@/types/product";
+import type { Product, ProductCategory, ProductImage } from "@/types/product";
 
 export type GiftBoxId = "classic" | "premium" | "executive";
 
@@ -80,6 +80,13 @@ export const DEFAULT_GIFT_BOX_CONFIG: GiftBoxConfig = {
   items: {},
   logo: null,
 };
+
+const PACKAGING_CATEGORY = /box(es)?\b|packaging/i;
+
+/** Boxes and outer packaging can't go inside a gift box. Matched by text so new categories are covered too. */
+export function isPackagingCategory({ slug, name }: ProductCategory): boolean {
+  return PACKAGING_CATEGORY.test(slug) || PACKAGING_CATEGORY.test(name);
+}
 
 export function productToGiftItem(product: Product): GiftItem {
   return {
