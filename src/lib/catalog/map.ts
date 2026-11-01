@@ -28,7 +28,5 @@ export function rowToProduct(row: ProductRow): Product {
     tags: [],
     specs,
     brandingMethods: row.branding_methods,
-    // Absent until the gift box migration has run, so reads keep working before then.
-    isGiftBoxItem: row.is_gift_box_item === true,
   };
 }

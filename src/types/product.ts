@@ -54,8 +54,6 @@ export interface Product {
   tags: ProductTag[];
   specs: ProductSpec[];
   brandingMethods: string[];
-  /** Offered in the gift box builder as well as the main catalogue. */
-  isGiftBoxItem: boolean;
 }
 
 export interface BreadcrumbItem {

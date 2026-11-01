@@ -19,7 +19,6 @@ export interface ProductInput {
   specs: ProductSpec[];
   branding_methods: string[];
   images: StoredImage[];
-  is_gift_box_item: boolean;
 }
 
 type ParseResult =
@@ -174,7 +173,6 @@ export function parseProductForm(formData: FormData): ParseResult {
       specs: specs!,
       branding_methods,
       images: images!,
-      is_gift_box_item: formData.get("is_gift_box_item") === "on",
     },
   };
 }

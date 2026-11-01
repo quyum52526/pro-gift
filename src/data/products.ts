@@ -28,10 +28,10 @@ export async function getProducts(): Promise<Product[]> {
   return data.map(rowToProduct);
 }
 
-/** Products admins have switched on for the builder. Shares getProducts' cache, so saves show up at once. */
+/** Every catalogue product with a photo to show. Shares getProducts' cache, so saves show up at once. */
 export async function getGiftBoxItems(): Promise<GiftItem[]> {
   const products = await getProducts();
-  return products.filter((product) => product.isGiftBoxItem && product.images.length > 0).map(productToGiftItem);
+  return products.filter((product) => product.images.length > 0).map(productToGiftItem);
 }
 
 /** Categories in display order, for the header tabs and catalogue filter. */

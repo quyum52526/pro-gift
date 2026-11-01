@@ -206,23 +206,6 @@ export function ProductForm({ categories, product, defaultCategoryId, existingCo
         </div>
       </FormSection>
 
-      <FormSection title="Gift box builder" description="Offer this product inside custom gift boxes.">
-        <label className="flex items-start gap-3 text-sm text-ink">
-          <input
-            type="checkbox"
-            name="is_gift_box_item"
-            defaultChecked={product?.is_gift_box_item ?? false}
-            className="mt-0.5 h-4 w-4 accent-teal"
-          />
-          <span>
-            <span className="font-medium">Show in gift box builder</span>
-            <span className="block text-xs text-muted-foreground">
-              Uses this product&apos;s name, first image and minimum price. It stays in the main catalogue either way.
-            </span>
-          </span>
-        </label>
-      </FormSection>
-
       <FormSection title="Specifications" description="Shown as a table on the product page.">
         {errors.specs && <p className="mb-3 text-xs text-red-700">{errors.specs}</p>}
         <SpecRows name="specs" initial={product?.specs ?? []} />
