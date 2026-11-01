@@ -104,6 +104,23 @@ export function getGiftBox(id: GiftBoxId): GiftBox {
   return GIFT_BOXES.find((box) => box.id === id) ?? GIFT_BOXES[0];
 }
 
+/** Browser storage and share links are user-editable, so unknown boxes and impossible quantities are dropped. */
+export function normalizeGiftBoxSelection(
+  value: { boxId?: unknown; items?: Record<string, unknown> } | null,
+): Pick<GiftBoxConfig, "boxId" | "items"> {
+  const box = GIFT_BOXES.find((candidate) => candidate.id === value?.boxId) ?? GIFT_BOXES[0];
+
+  const items: GiftBoxConfig["items"] = {};
+  let remaining = box.capacity;
+  for (const [id, quantity] of Object.entries(value?.items ?? {})) {
+    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) continue;
+    const allowed = Math.min(quantity, remaining);
+    if (allowed > 0) items[id] = allowed;
+    remaining -= allowed;
+  }
+  return { boxId: box.id, items };
+}
+
 export function countGiftItems(items: GiftBoxConfig["items"]): number {
   return Object.values(items).reduce((count, quantity) => count + quantity, 0);
 }

@@ -14,6 +14,7 @@ import {
   setGiftBoxLogo,
   useGiftBoxConfig,
 } from "@/lib/gift-box/store";
+import { buildGiftBoxViewUrl } from "@/lib/gift-box/share";
 import { cn, formatBDT } from "@/lib/utils";
 import { buildGiftBoxWhatsAppUrl } from "@/lib/whatsapp";
 import { GiftBoxPreviewPanel, GiftItemThumbnail } from "./gift-box-preview";
@@ -39,6 +40,8 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
     })),
     total,
     withLogo: config.logo !== null,
+    // The link only renders with items in the box, which never happens on the server.
+    viewUrl: typeof window === "undefined" ? undefined : buildGiftBoxViewUrl(window.location.origin, config),
   });
 
   return (

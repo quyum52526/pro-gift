@@ -2,9 +2,9 @@ import { useEffect, useSyncExternalStore } from "react";
 
 import {
   DEFAULT_GIFT_BOX_CONFIG,
-  GIFT_BOXES,
   countGiftItems,
   getGiftBox,
+  normalizeGiftBoxSelection,
   type GiftBoxConfig,
   type GiftBoxId,
   type GiftBoxLogo,
@@ -27,21 +27,9 @@ function parseLogo(raw: string | null): GiftBoxLogo | null {
   return { dataUrl, fileName: typeof fileName === "string" ? fileName : "logo" };
 }
 
-/** Storage is user-editable, so unknown boxes and impossible quantities are dropped. */
 function parseConfig(raw: string | null, logo: GiftBoxLogo | null): GiftBoxConfig {
   if (!raw) return { ...DEFAULT_GIFT_BOX_CONFIG, logo };
-  const value = JSON.parse(raw) as { boxId?: unknown; items?: Record<string, unknown> } | null;
-  const box = GIFT_BOXES.find((candidate) => candidate.id === value?.boxId) ?? GIFT_BOXES[0];
-
-  const items: GiftBoxConfig["items"] = {};
-  let remaining = box.capacity;
-  for (const [id, quantity] of Object.entries(value?.items ?? {})) {
-    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) continue;
-    const allowed = Math.min(quantity, remaining);
-    if (allowed > 0) items[id] = allowed;
-    remaining -= allowed;
-  }
-  return { boxId: box.id, items, logo };
+  return { ...normalizeGiftBoxSelection(JSON.parse(raw)), logo };
 }
 
 function load(): GiftBoxConfig {
