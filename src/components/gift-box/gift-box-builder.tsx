@@ -3,9 +3,9 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ImageUp, Minus, Plus, Trash2 } from "lucide-react";
 
+import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import { Button } from "@/components/ui/button";
 import { GIFT_BOXES, summarizeGiftBox, type GiftItem } from "@/lib/gift-box/catalog";
 import {
@@ -15,6 +15,7 @@ import {
   useGiftBoxConfig,
 } from "@/lib/gift-box/store";
 import { cn, formatBDT } from "@/lib/utils";
+import { buildGiftBoxWhatsAppUrl } from "@/lib/whatsapp";
 import { GiftBoxPreviewPanel, GiftItemThumbnail } from "./gift-box-preview";
 
 const ACCEPTED_TYPES = ["image/png", "image/svg+xml", "image/jpeg", "image/webp"];
@@ -22,11 +23,23 @@ const ACCEPTED_TYPES = ["image/png", "image/svg+xml", "image/jpeg", "image/webp"
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
 export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
-  const router = useRouter();
   const config = useGiftBoxConfig(catalogue);
   const { box, lines, itemCount, total } = summarizeGiftBox(config, catalogue);
   const isFull = itemCount >= box.capacity;
   const logoUrl = config.logo?.dataUrl;
+  const inquiryUrl = buildGiftBoxWhatsAppUrl({
+    boxName: box.name,
+    boxPrice: box.price,
+    lines: lines.map(({ item, quantity, total: lineTotal }) => ({
+      name: item.name,
+      code: item.code,
+      quantity,
+      unitPrice: item.price,
+      total: lineTotal,
+    })),
+    total,
+    withLogo: config.logo !== null,
+  });
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 pt-8 pb-16 sm:px-6">
@@ -163,18 +176,28 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
             <p className="mt-1 text-xs text-muted-foreground">
               Based on starting prices. The final price depends on quantity and branding.
             </p>
-            <button
-              type="button"
-              disabled={itemCount === 0}
-              onClick={() => router.push("/gift-box/checkout")}
-              className="pg-btn pg-btn-teal mt-5 w-full disabled:pointer-events-none disabled:opacity-50"
-            >
-              Proceed to checkout <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
-            {itemCount === 0 && (
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Add at least one product to continue.
-              </p>
+            {itemCount === 0 ? (
+              <>
+                <Button variant="whatsapp" size="lg" disabled className="mt-5 w-full">
+                  <WhatsAppIcon className="h-5 w-5" /> Send Inquiry via WhatsApp
+                </Button>
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  Add at least one product to continue.
+                </p>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="whatsapp" size="lg" className="mt-5 w-full">
+                  <a href={inquiryUrl} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="h-5 w-5" /> Send Inquiry via WhatsApp
+                  </a>
+                </Button>
+                {config.logo && (
+                  <p className="mt-3 text-center text-xs text-muted-foreground">
+                    Please attach your logo file to the chat, as it can&apos;t be sent automatically.
+                  </p>
+                )}
+              </>
             )}
             <Link href="/#catalog" className="pg-btn pg-btn-line mt-4 w-full">
               <ArrowLeft className="h-4 w-4" aria-hidden /> Continue shopping

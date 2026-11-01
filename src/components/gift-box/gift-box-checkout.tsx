@@ -38,6 +38,7 @@ export function GiftBoxCheckout({ catalogue }: { catalogue: GiftItem[] }) {
       name: item.name,
       code: item.code,
       quantity,
+      unitPrice: item.price,
       total: lineTotal,
     })),
     total,

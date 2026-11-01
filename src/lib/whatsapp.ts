@@ -51,18 +51,24 @@ export function buildQuickInquiryUrl(product: Pick<Product, "name" | "code">): s
 export interface GiftBoxOrder {
   boxName: string;
   boxPrice: number;
-  lines: { name: string; code: string; quantity: number; total: number }[];
+  lines: { name: string; code: string; quantity: number; unitPrice: number; total: number }[];
   total: number;
   withLogo: boolean;
 }
 
-/** Full custom gift box order, sent from the gift box checkout. */
+/** Full custom gift box configuration, sent from the builder and the gift box checkout. */
 export function buildGiftBoxWhatsAppUrl(order: GiftBoxOrder): string {
   const lines = [
-    "Hello Pro Gift! I'd like to order this custom gift box:",
+    "Hello Pro Gift! I'd like a quote for this custom gift box:",
     "",
     `Box: ${order.boxName} (${formatBDT(order.boxPrice)})`,
-    ...order.lines.map((line) => `${line.name} (${line.code}) x ${line.quantity}: from ${formatBDT(line.total)}`),
+    "",
+    "Items:",
+    ...order.lines.map(
+      (line) =>
+        `- ${line.name} (SKU: ${line.code}): ${line.quantity} x from ${formatBDT(line.unitPrice)} = from ${formatBDT(line.total)}`,
+    ),
+    "",
     `Estimated total: from ${formatBDT(order.total)}`,
   ];
   if (order.withLogo) lines.push("Branding: I'll share my logo file in this chat.");
