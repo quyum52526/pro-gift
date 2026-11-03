@@ -1,10 +1,16 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getCategories, getProducts } from "@/data/products";
 import { CatalogGrid, CatalogGridSkeleton } from "@/components/product/catalog-grid";
 import { HomeHero } from "@/components/home/home-hero";
 import { ProductStrip } from "@/components/home/product-strip";
+
+export const metadata: Metadata = {
+  // ?category= views are the same page, so they all point here.
+  alternates: { canonical: "/" },
+};
 
 export default async function Home() {
   const [products, categories] = await Promise.all([getProducts(), getCategories()]);

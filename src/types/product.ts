@@ -54,6 +54,8 @@ export interface Product {
   tags: ProductTag[];
   specs: ProductSpec[];
   brandingMethods: string[];
+  /** ISO timestamp of the last edit. */
+  updatedAt: string;
 }
 
 export interface BreadcrumbItem {

@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -12,15 +13,34 @@ const poppins = Poppins({
   display: "swap",
 });
 
+const DEFAULT_TITLE = "Pro Gift | Premium Corporate Gifts in Bangladesh";
+const DEFAULT_DESCRIPTION =
+  "Premium corporate gifts in Bangladesh with custom logo branding: crests, awards, diaries, mugs, power banks and gift boxes. Request a bulk quote on WhatsApp.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Pro Gift | Premium Corporate Gifts in Bangladesh",
-    template: "%s | Pro Gift",
+    default: DEFAULT_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Premium corporate gifts with custom logo branding. Request a quote on WhatsApp.",
-  applicationName: "Pro Gift",
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "corporate gifts Bangladesh",
+    "corporate gift shop Bangladesh",
+    "corporate gift items BD",
+    "custom logo gifts Bangladesh",
+    "branded promotional items Bangladesh",
+    "employee gifts Bangladesh",
+    "custom gift box Bangladesh",
+    "crest and award Bangladesh",
+    "Pro Gift",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
   // Generated from public/pro-gift-logo-icon.* (cropped, see public/brand).
   icons: {
     icon: [
@@ -33,11 +53,13 @@ export const metadata: Metadata = {
     apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    type: "website",
-    siteName: "Pro Gift",
-    locale: "en_BD",
-    images: [{ url: "/pro-gift-logo.jpg", width: 4500, height: 4500, alt: "Pro Gift – Corporate Gift Shop" }],
+    ...OPEN_GRAPH_DEFAULTS,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
+  // Title, description and image are filled per page from its openGraph.
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

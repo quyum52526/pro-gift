@@ -28,5 +28,6 @@ export function rowToProduct(row: ProductRow): Product {
     tags: [],
     specs,
     brandingMethods: row.branding_methods,
+    updatedAt: row.updated_at,
   };
 }

@@ -4,12 +4,11 @@ import { notFound } from "next/navigation";
 
 import { getProductBySlug, getProducts, getRelatedProducts } from "@/data/products";
 import { categoryHref } from "@/lib/catalog/category-filter";
+import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_URL, absoluteUrl } from "@/lib/site";
 import { formatPriceRange } from "@/lib/utils";
 import { ProductDetailPage } from "@/components/product/product-detail-page";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductDetailSkeleton } from "@/components/product/product-detail-skeleton";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -24,14 +23,17 @@ export async function generateMetadata({
   if (!product) return {};
 
   const price = formatPriceRange(product.priceRange.min, product.priceRange.max);
+  const image = product.images.at(0);
   return {
     title: `${product.name} (${product.code})`,
     description: `${product.shortDescription} Price range ${price}. Custom logo branding available.`,
     alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
+      ...OPEN_GRAPH_DEFAULTS,
       title: product.name,
       description: product.shortDescription,
-      images: [{ url: product.images[0].src, alt: product.images[0].alt }],
+      url: `/products/${product.slug}`,
+      images: [image ? { url: image.src, alt: image.alt } : DEFAULT_OG_IMAGE],
     },
   };
 }
@@ -61,8 +63,7 @@ async function ProductContent({ params }: { params: Promise<{ slug: string }> })
     name: product.name,
     sku: product.code,
     description: product.description,
-    // Uploaded images are absolute Supabase URLs; bundled ones are site-relative.
-    image: product.images.map((img) => (img.src.startsWith("/") ? `${SITE_URL}${img.src}` : img.src)),
+    image: product.images.map((img) => absoluteUrl(img.src)),
     brand: { "@type": "Brand", name: "Pro Gift" },
     offers: {
       "@type": "AggregateOffer",
