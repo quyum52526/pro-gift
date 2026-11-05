@@ -8,7 +8,7 @@ import { saveProduct } from "@/app/admin/products/actions";
 import { Button } from "@/components/ui/button";
 import { IDLE_STATE } from "@/lib/admin/form-state";
 import { generateProductCode } from "@/lib/catalog/product-code";
-import type { CategoryRow, ProductRow } from "@/lib/catalog/types";
+import { rowCategories, type CategoryRow, type ProductRow } from "@/lib/catalog/types";
 import { Field, FormSection, controlClass, errorProps } from "./field";
 import { ImageUploader } from "./image-uploader";
 import { SpecRows } from "./spec-rows";
@@ -28,6 +28,10 @@ export function ProductForm({ categories, product, defaultCategoryId, existingCo
   const [uploading, setUploading] = React.useState(false);
   const [name, setName] = React.useState(product?.name ?? "");
   const [categoryId, setCategoryId] = React.useState(product?.category_id ?? defaultCategoryId ?? "");
+  // Other categories the product is also listed under. The primary is never in here.
+  const [extraIds, setExtraIds] = React.useState<string[]>(() =>
+    product ? rowCategories(product).map((c) => c.id).filter((id) => id !== product.category_id) : [],
+  );
   // Null means the code follows the name and category. Saved products start with their
   // own code, because customers already see it and it must not change by itself.
   const [manualCode, setManualCode] = React.useState<string | null>(product?.code ?? null);
@@ -68,13 +72,17 @@ export function ProductForm({ categories, product, defaultCategoryId, existingCo
               {...errorProps("name", errors.name)}
             />
           </Field>
-          <Field label="Category" htmlFor="category_id" error={errors.category_id}>
+          <Field label="Main category" htmlFor="category_id" error={errors.category_id}>
             <select
               id="category_id"
               name="category_id"
               required
               value={categoryId}
-              onChange={(event) => setCategoryId(event.target.value)}
+              onChange={(event) => {
+                const next = event.target.value;
+                setCategoryId(next);
+                setExtraIds((ids) => ids.filter((id) => id !== next));
+              }}
               className={controlClass}
               {...errorProps("category_id", errors.category_id)}
             >
@@ -119,6 +127,45 @@ export function ProductForm({ categories, product, defaultCategoryId, existingCo
               </button>
             )}
           </Field>
+          <fieldset
+            className="flex flex-col gap-2 sm:col-span-2"
+            aria-describedby={errors.extra_category_ids ? "extra_category_ids-error" : "extra_category_ids-hint"}
+          >
+            <legend className="text-sm font-medium text-ink">Also list under</legend>
+            <p id="extra_category_ids-hint" className="text-xs text-muted-foreground">
+              Optional. The product shows in each ticked category; the main category above sets the code and breadcrumb.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {categories
+                .filter((option) => option.id !== categoryId)
+                .map((option) => {
+                  const checked = extraIds.includes(option.id);
+                  return (
+                    <label
+                      key={option.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-lg border bg-surface px-3 py-1.5 text-sm text-ink has-[:checked]:border-teal has-[:checked]:bg-surface-tint"
+                    >
+                      <input
+                        type="checkbox"
+                        name="extra_category_ids"
+                        value={option.id}
+                        checked={checked}
+                        onChange={() =>
+                          setExtraIds((ids) => (checked ? ids.filter((id) => id !== option.id) : [...ids, option.id]))
+                        }
+                        className="h-4 w-4 accent-teal"
+                      />
+                      {option.name}
+                    </label>
+                  );
+                })}
+            </div>
+            {errors.extra_category_ids && (
+              <p id="extra_category_ids-error" className="text-xs text-red-700">
+                {errors.extra_category_ids}
+              </p>
+            )}
+          </fieldset>
           <Field
             label="Short description"
             htmlFor="short_description"
@@ -222,6 +269,21 @@ export function ProductForm({ categories, product, defaultCategoryId, existingCo
             className={controlClass}
           />
         </Field>
+        <label className="mt-5 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            name="available_for_gift_box"
+            defaultChecked={product?.available_for_gift_box ?? true}
+            aria-describedby="available_for_gift_box-hint"
+            className="mt-0.5 h-4 w-4 accent-teal"
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-ink">Available in Gift Box Builder</span>
+            <span id="available_for_gift_box-hint" className="text-xs text-muted-foreground">
+              Customers can add it inside a box on /gift-box. Turn off for boxes and packaging.
+            </span>
+          </span>
+        </label>
       </FormSection>
 
       <FormSection title="Media" description="Product photos and the 360° / demo video.">

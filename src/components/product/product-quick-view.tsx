@@ -186,7 +186,11 @@ export function ProductQuickView({ product }: { product: Product }) {
         <section className="flex min-w-0 flex-col gap-5 lg:col-start-2 lg:row-start-1">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{product.category.name}</Badge>
+              {product.categories.map((category) => (
+              <Badge key={category.slug} variant="secondary">
+                {category.name}
+              </Badge>
+            ))}
               <Badge variant="outline" className="font-mono tracking-wide">
                 {product.code}
               </Badge>

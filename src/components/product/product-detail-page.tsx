@@ -133,7 +133,11 @@ export function ProductDetailPage({ product, breadcrumbs, productUrl }: ProductD
         {/* Details */}
         <div className="flex flex-col">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{product.category.name}</Badge>
+            {product.categories.map((category) => (
+              <Badge key={category.slug} variant="secondary">
+                {category.name}
+              </Badge>
+            ))}
             <Badge variant="outline" className="font-mono tracking-wide">
               {product.code}
             </Badge>

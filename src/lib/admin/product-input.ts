@@ -5,9 +5,13 @@ import type { StoredImage } from "@/lib/catalog/types";
 import { PRODUCT_IMAGES_PUBLIC_PREFIX } from "@/lib/supabase/config";
 import { MAX_IMAGES } from "./form-state";
 
+/** Most categories one product can be listed under. */
+export const MAX_CATEGORIES = 6;
+
 export interface ProductInput {
   name: string;
   code: string;
+  /** Primary category: picks the code prefix and the breadcrumb. */
   category_id: string;
   short_description: string;
   description: string;
@@ -18,11 +22,12 @@ export interface ProductInput {
   video_url: string | null;
   specs: ProductSpec[];
   branding_methods: string[];
+  available_for_gift_box: boolean;
   images: StoredImage[];
 }
 
 type ParseResult =
-  | { ok: true; data: ProductInput }
+  | { ok: true; data: ProductInput; categoryIds: string[] }
   | { ok: false; fieldErrors: Partial<Record<string, string>> };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -116,6 +121,19 @@ export function parseProductForm(formData: FormData): ParseResult {
   const category_id = text(formData, "category_id");
   if (!UUID.test(category_id)) fieldErrors.category_id = "Choose a category.";
 
+  // Extra categories the product also shows under; the primary always comes first.
+  const extraIds = formData
+    .getAll("extra_category_ids")
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim());
+  if (extraIds.some((value) => !UUID.test(value))) {
+    fieldErrors.extra_category_ids = "Categories couldn't be read. Reload and try again.";
+  }
+  const categoryIds = [...new Set([category_id, ...extraIds])];
+  if (categoryIds.length > MAX_CATEGORIES) {
+    fieldErrors.extra_category_ids = `Up to ${MAX_CATEGORIES} categories in total.`;
+  }
+
   const short_description = text(formData, "short_description");
   if (!short_description) fieldErrors.short_description = "Add a one-line summary.";
   else if (short_description.length > 200) fieldErrors.short_description = "Keep it under 200 characters.";
@@ -172,8 +190,11 @@ export function parseProductForm(formData: FormData): ParseResult {
       video_url: videoUrl || null,
       specs: specs!,
       branding_methods,
+      // Unchecked checkboxes aren't submitted, so absence means "no".
+      available_for_gift_box: formData.get("available_for_gift_box") === "on",
       images: images!,
     },
+    categoryIds,
   };
 }
 

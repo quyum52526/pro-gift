@@ -63,8 +63,9 @@ export async function saveProduct(_prev: ActionState, formData: FormData): Promi
   if (!parsed.ok) {
     return { status: "error", message: "Please fix the highlighted fields.", fieldErrors: parsed.fieldErrors };
   }
-  const input = parsed.data;
+  const { data: input, categoryIds } = parsed;
   const id = formData.get("id");
+  let productId: string;
 
   if (typeof id === "string" && id) {
     const { data: existing, error: readError } = await admin.supabase
@@ -80,12 +81,36 @@ export async function saveProduct(_prev: ActionState, formData: FormData): Promi
       return error.code === "23505" ? uniqueViolation(error.message) : { status: "error", message: error.message };
     }
     await removeOrphanedImages(admin, existing.images, input.images);
+    productId = id;
   } else {
     const slug = await uniqueSlug(admin, input.name, input.code);
-    const { error } = await admin.supabase.from("products").insert({ ...input, slug });
+    const { data, error } = await admin.supabase
+      .from("products")
+      .insert({ ...input, slug })
+      .select("id")
+      .single<{ id: string }>();
     if (error) {
       return error.code === "23505" ? uniqueViolation(error.message) : { status: "error", message: error.message };
     }
+    productId = data.id;
+  }
+
+  // One transaction: replaces the category links and keeps category_id as the primary.
+  const { error: categoryError } = await admin.supabase.rpc("pro_gift_set_product_categories", {
+    p_product_id: productId,
+    p_category_ids: categoryIds,
+  });
+  if (categoryError) {
+    if (!(typeof id === "string" && id)) {
+      // Undo the insert so a retry doesn't hit "code already in use".
+      await admin.supabase.from("products").delete().eq("id", productId);
+      return { status: "error", message: `Couldn't save categories: ${categoryError.message}` };
+    }
+    refreshCatalogue();
+    return {
+      status: "error",
+      message: `Product saved, but its categories couldn't be updated: ${categoryError.message}`,
+    };
   }
 
   refreshCatalogue();

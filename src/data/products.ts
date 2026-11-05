@@ -1,7 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { rowToProduct } from "@/lib/catalog/map";
-import { isPackagingCategory, productToGiftItem, type GiftItem } from "@/lib/gift-box/catalog";
+import { inCategory } from "@/lib/catalog/category-filter";
+import { productToGiftItem, type GiftItem } from "@/lib/gift-box/catalog";
 import { PRODUCT_SELECT, type ProductRow } from "@/lib/catalog/types";
 import { createPublicClient } from "@/lib/supabase/server";
 import type { Product, ProductCategory } from "@/types/product";
@@ -28,11 +29,14 @@ export async function getProducts(): Promise<Product[]> {
   return data.map(rowToProduct);
 }
 
-/** Catalogue products that can go in a gift box and have a photo. Shares getProducts' cache, so saves show up at once. */
+/**
+ * Products the admin marked available for the gift box builder, with a photo.
+ * Filters getProducts' cached rows rather than querying again, so admin saves show up at once.
+ */
 export async function getGiftBoxItems(): Promise<GiftItem[]> {
   const products = await getProducts();
   return products
-    .filter((product) => product.images.length > 0 && !isPackagingCategory(product.category))
+    .filter((product) => product.images.length > 0 && product.availableForGiftBox)
     .map(productToGiftItem);
 }
 
@@ -59,8 +63,9 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 
 export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
   const others = (await getProducts()).filter((p) => p.slug !== product.slug);
-  // Same category first, then the rest.
-  const sameCategory = others.filter((p) => p.category.slug === product.category.slug);
-  const rest = others.filter((p) => p.category.slug !== product.category.slug);
+  // Products sharing any category first, then the rest.
+  const shares = (other: Product) => product.categories.some((category) => inCategory(other, category.slug));
+  const sameCategory = others.filter(shares);
+  const rest = others.filter((other) => !shares(other));
   return [...sameCategory, ...rest].slice(0, limit);
 }

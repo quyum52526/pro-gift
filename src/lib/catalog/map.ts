@@ -1,7 +1,14 @@
 import type { Product } from "@/types/product";
-import type { ProductRow } from "./types";
+import { rowCategories, type ProductRow } from "./types";
 
 const LEAD_TIME_LABEL = "Lead time";
+
+const UNCATEGORISED = { name: "Uncategorised", slug: "uncategorised" };
+
+function categoriesOf(row: ProductRow): Product["categories"] {
+  const categories = rowCategories(row).map(({ name, slug }) => ({ name, slug }));
+  return categories.length > 0 ? categories : [UNCATEGORISED];
+}
 
 /** Converts a database row to the shape the storefront components use. */
 export function rowToProduct(row: ProductRow): Product {
@@ -16,9 +23,7 @@ export function rowToProduct(row: ProductRow): Product {
     slug: row.slug,
     code: row.code,
     name: row.name,
-    category: row.category
-      ? { name: row.category.name, slug: row.category.slug }
-      : { name: "Uncategorised", slug: "uncategorised" },
+    categories: categoriesOf(row),
     shortDescription: row.short_description,
     description: row.description,
     priceRange: { min: row.price_min, max: row.price_max },
@@ -28,6 +33,7 @@ export function rowToProduct(row: ProductRow): Product {
     tags: [],
     specs,
     brandingMethods: row.branding_methods,
+    availableForGiftBox: row.available_for_gift_box,
     updatedAt: row.updated_at,
   };
 }

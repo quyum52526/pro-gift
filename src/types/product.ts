@@ -42,7 +42,8 @@ export interface Product {
   slug: string;
   code: string;
   name: string;
-  category: ProductCategory;
+  /** Every category the product is listed under. Never empty; the first is the primary one. */
+  categories: ProductCategory[];
   shortDescription: string;
   description: string;
   priceRange: PriceRange;
@@ -54,6 +55,8 @@ export interface Product {
   tags: ProductTag[];
   specs: ProductSpec[];
   brandingMethods: string[];
+  /** Whether the gift box builder offers it as an item to put inside a box. */
+  availableForGiftBox: boolean;
   /** ISO timestamp of the last edit. */
   updatedAt: string;
 }

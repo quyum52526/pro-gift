@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin/auth";
 import { listCategories, listProducts } from "@/lib/admin/queries";
-import type { CategoryRow, ProductRow } from "@/lib/catalog/types";
+import { rowCategories, type CategoryRow, type ProductRow } from "@/lib/catalog/types";
 
 export const metadata: Metadata = { title: "Products" };
 
@@ -45,11 +45,14 @@ async function ProductList({ searchParams }: Pick<PageProps<"/admin/products">, 
   ]);
   const saved = typeof params.saved === "string" ? params.saved : null;
 
+  // A product with several categories is listed under each of them.
   const byCategory = new Map<string, ProductRow[]>();
   for (const product of products) {
-    const list = byCategory.get(product.category_id) ?? [];
-    list.push(product);
-    byCategory.set(product.category_id, list);
+    for (const category of rowCategories(product)) {
+      const list = byCategory.get(category.id) ?? [];
+      list.push(product);
+      byCategory.set(category.id, list);
+    }
   }
 
   return (

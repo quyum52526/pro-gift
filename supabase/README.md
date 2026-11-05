@@ -24,6 +24,19 @@ The three launch products are seeded too, using the images in `public/products`.
 Then run [`migrations/20261028000000_pro_gift_dummy_products.sql`](migrations/20261028000000_pro_gift_dummy_products.sql)
 the same way. It adds 15 sample products so every category has at least three. Re-running it is safe: slugs that already exist are skipped.
 
+Then run [`migrations/20261105000000_pro_gift_product_categories.sql`](migrations/20261105000000_pro_gift_product_categories.sql).
+It lets one product appear in several categories:
+
+| Object | Purpose |
+|---|---|
+| `product_categories` | Every category a product is listed under. Existing products are copied in from `products.category_id`. |
+| `pro_gift_set_product_categories()` | Replaces a product's categories in one transaction; the first id becomes `products.category_id` (the main category, which sets the code prefix and breadcrumb). |
+
+Then run [`migrations/20261106000000_pro_gift_gift_box_availability.sql`](migrations/20261106000000_pro_gift_gift_box_availability.sql).
+It adds `products.available_for_gift_box` (default `true`), which decides whether `/gift-box` offers a product as an item to put inside a box. Products listed only under box or packaging categories start as `false`. Admins change it with the "Available in Gift Box Builder" checkbox.
+
+Deploy the app version that reads `product_categories` together with these migrations: once the table exists, older app code that embeds `categories(...)` directly gets an "ambiguous relationship" error from the API.
+
 Each migration runs in one transaction. If it fails part-way, nothing is created and it can be re-run.
 
 ## 2. Create an admin
