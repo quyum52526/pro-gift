@@ -1,19 +1,17 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getCategories, getProducts } from "@/data/products";
-import { CatalogGrid, CatalogGridSkeleton } from "@/components/product/catalog-grid";
+import { getProducts } from "@/data/products";
+import { CatalogGrid } from "@/components/product/catalog-grid";
 import { HomeHero } from "@/components/home/home-hero";
 import { ProductStrip } from "@/components/home/product-strip";
 
 export const metadata: Metadata = {
-  // ?category= views are the same page, so they all point here.
   alternates: { canonical: "/" },
 };
 
 export default async function Home() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const products = await getProducts();
 
   return (
     <main className="flex-1">
@@ -33,10 +31,8 @@ export default async function Home() {
         </div>
       </div>
       <div id="catalog" className="mx-auto w-full max-w-[1200px] scroll-mt-4 px-6 pt-6 pb-16">
-        {/* Filtering happens on the client from ?category=, so switching categories is instant. */}
-        <Suspense fallback={<CatalogGridSkeleton />}>
-          <CatalogGrid products={products} categories={categories} />
-        </Suspense>
+        {/* All gifts; each category has its own page at /category/<slug>. */}
+        <CatalogGrid products={products} />
       </div>
     </main>
   );

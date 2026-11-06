@@ -88,7 +88,7 @@ export async function SiteFooter() {
             <ul className="flex flex-col items-start gap-1.5">
               {[{ name: "All Gifts", slug: undefined }, ...categories].map(({ name, slug }) => (
                 <li key={slug ?? "all"}>
-                  <Link href={`${categoryHref(slug)}#catalog`} className="pg-flink">
+                  <Link href={slug ? categoryHref(slug) : "/#catalog"} className="pg-flink">
                     {name}
                   </Link>
                 </li>

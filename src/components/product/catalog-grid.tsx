@@ -1,45 +1,33 @@
-"use client";
-
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { PackageSearch } from "lucide-react";
 
-import {
-  CATEGORY_PARAM,
-  categoryHref,
-  filterByCategory,
-  resolveCategorySlug,
-} from "@/lib/catalog/category-filter";
+import { categoryHref } from "@/lib/catalog/category-filter";
 import { Button } from "@/components/ui/button";
-import type { Product, ProductCategory } from "@/types/product";
+import type { Product } from "@/types/product";
 import { ProductCard } from "./product-card";
 
 interface CatalogGridProps {
   products: Product[];
-  categories: ProductCategory[];
+  /** Grid heading: "All Gifts" on the home page, the category name on a category page. */
+  heading?: string;
 }
 
-/** Product grid filtered by ?category=. Needs a <Suspense> boundary (reads search params). */
-export function CatalogGrid({ products, categories }: CatalogGridProps) {
-  const searchParams = useSearchParams();
-  const activeSlug = resolveCategorySlug(searchParams.get(CATEGORY_PARAM), categories);
-  const activeCategory = categories.find((category) => category.slug === activeSlug);
-  const visible = filterByCategory(products, activeSlug);
-
+/** Product grid. Category pages pass their own products; the home page passes all of them. */
+export function CatalogGrid({ products, heading = "All Gifts" }: CatalogGridProps) {
   return (
     <section aria-labelledby="catalog-heading" className="mt-8">
       <div className="flex items-baseline justify-between gap-4">
         <h2 id="catalog-heading" className="text-lg font-semibold text-ink">
-          {activeCategory?.name ?? "All Gifts"}
+          {heading}
         </h2>
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          {visible.length} {visible.length === 1 ? "product" : "products"}
+          {products.length} {products.length === 1 ? "product" : "products"}
         </p>
       </div>
 
-      {visible.length > 0 ? (
+      {products.length > 0 ? (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {visible.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
         </div>

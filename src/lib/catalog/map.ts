@@ -18,17 +18,26 @@ export function rowToProduct(row: ProductRow): Product {
       ? [...row.specs, { label: LEAD_TIME_LABEL, value: row.lead_time }]
       : row.specs;
 
+  const categories = categoriesOf(row);
+  // Admin uploads may leave alt empty; describe the product instead.
+  const fallbackAlt = (index: number) =>
+    `${row.name}, ${categories[0].name} corporate gift by Pro Gift${index > 0 ? ` (photo ${index + 1})` : ""}`;
+
   return {
     id: row.id,
     slug: row.slug,
     code: row.code,
     name: row.name,
-    categories: categoriesOf(row),
+    categories,
     shortDescription: row.short_description,
     description: row.description,
     priceRange: { min: row.price_min, max: row.price_max },
     moq: row.moq,
-    images: row.images.map(({ src, alt, printArea }) => ({ src, alt, printArea })),
+    images: row.images.map(({ src, alt, printArea }, index) => ({
+      src,
+      alt: alt?.trim() || fallbackAlt(index),
+      printArea,
+    })),
     videoUrl: row.video_url ?? undefined,
     tags: [],
     specs,

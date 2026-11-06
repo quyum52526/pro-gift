@@ -40,6 +40,14 @@ export function buildGeneralWhatsAppUrl(): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
 }
 
+/** Quote request from a category page. */
+export function buildCategoryWhatsAppUrl(categoryName: string): string {
+  const text = encodeURIComponent(
+    `Hello Pro Gift! I'm looking for ${categoryName} corporate gifts with our logo. Could you share options and a quote?`,
+  );
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+}
+
 /** Short one-line inquiry used by catalogue cards and the quick view. */
 export function buildQuickInquiryUrl(product: Pick<Product, "name" | "code">): string {
   const text = encodeURIComponent(

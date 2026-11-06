@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
 
-import { getProducts } from "@/data/products";
+import { getCategories, getProducts } from "@/data/products";
+import { categoryHref, filterByCategory } from "@/lib/catalog/category-filter";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
-/** Lists indexable pages only. Category filters are /?category= views of the home page, so they are left out. */
+/** Lists indexable pages only. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   // Home and the gift box builder show the catalogue, so they change when it does.
   const catalogueUpdatedAt = products.map((product) => product.updatedAt).sort().at(-1);
@@ -28,6 +29,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.6,
     },
+    ...categories.map((category) => {
+      // A category page changes when any of its products does.
+      const updatedAt = filterByCategory(products, category.slug)
+        .map((product) => product.updatedAt)
+        .sort()
+        .at(-1);
+      return {
+        url: `${SITE_URL}${categoryHref(category.slug)}`,
+        lastModified: updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      };
+    }),
     ...products.map((product) => ({
       url: `${SITE_URL}/products/${product.slug}`,
       lastModified: product.updatedAt,

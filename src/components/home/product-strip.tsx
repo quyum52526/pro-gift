@@ -18,7 +18,7 @@ function StripThumb({ product, hidden = false }: { product: Product; hidden?: bo
     >
       <span className="pg-pimg relative block overflow-hidden">
         {/* Zoomed in to trim the empty backdrop; the box clips the rest, and the product stays whole. */}
-        <Image src={cover.src} alt="" fill sizes="128px" className="origin-[50%_32%] scale-[1.15] object-cover" />
+        <Image src={cover.src} alt={cover.alt} fill sizes="128px" className="origin-[50%_32%] scale-[1.15] object-cover" />
       </span>
     </a>
   );

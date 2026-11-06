@@ -61,7 +61,7 @@ function CardThumb({ product }: { product: Product }) {
           {icon}
         </svg>
       ) : (
-        cover && <Image src={cover.src} alt="" fill sizes="46px" className="object-cover" />
+        cover && <Image src={cover.src} alt={cover.alt} fill sizes="46px" className="object-cover" />
       )}
     </div>
   );

@@ -159,7 +159,7 @@ export function ProductQuickView({ product }: { product: Product }) {
                   >
                     <Image
                       src={image.src}
-                      alt=""
+                      alt={image.alt}
                       fill
                       sizes="(min-width: 640px) 160px, 33vw"
                       className="object-cover"
