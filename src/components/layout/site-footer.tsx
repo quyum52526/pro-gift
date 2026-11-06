@@ -4,7 +4,7 @@ import { cacheLife } from "next/cache";
 
 import { getCategories } from "@/data/products";
 import { categoryHref } from "@/lib/catalog/category-filter";
-import { SITE_CONTACT } from "@/lib/site";
+import { SITE_ADDRESS, SITE_CONTACT } from "@/lib/site";
 import { buildGeneralWhatsAppUrl } from "@/lib/whatsapp";
 import { BackToTop } from "./back-to-top";
 
@@ -23,6 +23,8 @@ export async function SiteFooter() {
   const whatsappUrl = buildGeneralWhatsAppUrl();
 
   const contacts = [
+    { label: "Address", value: SITE_ADDRESS.full, href: SITE_ADDRESS.mapsHref, external: true },
+    { label: "Phone", value: SITE_CONTACT.phone.label, href: SITE_CONTACT.phone.href, external: false },
     { label: "WhatsApp", value: SITE_CONTACT.whatsapp.label, href: whatsappUrl, external: true },
     { label: "Email", value: SITE_CONTACT.email, href: `mailto:${SITE_CONTACT.email}`, external: false },
     { label: "Website", value: SITE_CONTACT.website.label, href: SITE_CONTACT.website.href, external: true },
@@ -76,6 +78,9 @@ export async function SiteFooter() {
               />
             </a>
             <p className="text-sm leading-5">Premium corporate gifts.</p>
+            <Link href="/contact" className="pg-flink self-start font-semibold">
+              Contact
+            </Link>
           </div>
 
           <nav aria-label="Footer gift categories" className="flex min-w-0 flex-[1_1_200px] flex-col gap-3.5">

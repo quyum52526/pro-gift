@@ -4,7 +4,15 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  DEFAULT_OG_IMAGE,
+  OPEN_GRAPH_DEFAULTS,
+  SITE_ADDRESS,
+  SITE_CONTACT,
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+} from "@/lib/site";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -63,6 +71,29 @@ export const metadata: Metadata = {
   verification: { google: "qVwkVl3vp95wCgz-StbA9o2KnE_14LfGV3x1K_yP_80" },
 };
 
+// Local business details for search engines. No openingHours on purpose.
+const STORE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Store",
+  name: SITE_NAME,
+  url: SITE_CONTACT.website.href,
+  logo: absoluteUrl("/brand/icon-512.png"),
+  image: absoluteUrl(DEFAULT_OG_IMAGE.url),
+  description: DEFAULT_DESCRIPTION,
+  telephone: SITE_CONTACT.phone.label,
+  email: SITE_CONTACT.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE_ADDRESS.streetAddress,
+    addressLocality: SITE_ADDRESS.addressLocality,
+    postalCode: SITE_ADDRESS.postalCode,
+    addressCountry: SITE_ADDRESS.addressCountry,
+  },
+  areaServed: SITE_CONTACT.areaServed,
+  priceRange: "৳৳",
+  sameAs: SITE_CONTACT.social,
+};
+
 export const viewport: Viewport = {
   themeColor: "#1F6F8B",
 };
@@ -71,6 +102,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          // Escape "<" so the payload can never close the script tag.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STORE_JSON_LD).replace(/</g, "\\u003c") }}
+        />
         <SiteHeader />
         {children}
         <SiteFooter />

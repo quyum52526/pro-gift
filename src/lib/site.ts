@@ -1,11 +1,30 @@
 import { WHATSAPP_NUMBER } from "./whatsapp";
 
-/** Public contact details shown in the footer. */
+/** Postal address, split the way schema.org PostalAddress wants it. */
+export const SITE_ADDRESS = {
+  streetAddress: "Level 7, Suite 2, A K Complex, 19 Green Road",
+  addressLocality: "Dhaka",
+  postalCode: "1205",
+  addressCountry: "BD",
+  /** Exact text shown on the site. */
+  full: "Level 7, Suite 2, A K Complex, 19 Green Road, Dhanmondi, Dhaka 1205, Bangladesh",
+  mapsHref: "https://www.google.com/maps?q=Pro+Gift,+19+Green+Road,+Dhaka+1205",
+  mapsEmbed: "https://www.google.com/maps?q=Pro+Gift,+19+Green+Road,+Dhaka+1205&output=embed",
+} as const;
+
+/** Public contact details shown in the footer and on /contact. */
 export const SITE_CONTACT = {
   whatsapp: { label: `+${WHATSAPP_NUMBER}` },
+  phone: { href: "tel:+8801962434901", label: "+880 1962-434901" },
   email: "quyum52526@gmail.com",
   website: { href: "https://www.progift.com.bd", label: "www.progift.com.bd" },
   facebook: { href: "https://www.facebook.com/progiftbd", label: "facebook.com/progiftbd" },
+  areaServed: "Bangladesh",
+  social: [
+    "https://www.facebook.com/progiftbd",
+    "https://www.youtube.com/@PROGIFT-bd",
+    "https://www.linkedin.com/company/144066944",
+  ],
 } as const;
 
 export const SITE_NAME = "Pro Gift";
