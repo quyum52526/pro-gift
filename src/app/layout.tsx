@@ -60,6 +60,7 @@ export const metadata: Metadata = {
   },
   // Title, description and image are filled per page from its openGraph.
   twitter: { card: "summary_large_image" },
+  verification: { google: "qVwkVl3vp95wCgz-StbA9o2KnE_14LfGV3x1K_yP_80" },
 };
 
 export const viewport: Viewport = {
