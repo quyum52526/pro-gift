@@ -80,6 +80,9 @@ export async function SiteFooter() {
               />
             </a>
             <p className="text-sm leading-5">Premium corporate gifts.</p>
+            <Link href="/blog" className="pg-flink self-start font-semibold">
+              Blog
+            </Link>
             <Link href="/contact" className="pg-flink self-start font-semibold">
               Contact
             </Link>

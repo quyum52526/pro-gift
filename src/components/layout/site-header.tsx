@@ -38,7 +38,13 @@ export async function SiteHeader() {
             />
           </Link>
           <div className="flex shrink-0 items-center gap-3">
-            {/* Phones reach /contact from the footer. */}
+            {/* Phones reach /blog and /contact from the footer. */}
+            <Link
+              href="/blog"
+              className="hidden px-2 text-xs leading-4 font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:text-teal sm:inline-flex"
+            >
+              Blog
+            </Link>
             <Link
               href="/contact"
               className="hidden px-2 text-xs leading-4 font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:text-teal sm:inline-flex"
