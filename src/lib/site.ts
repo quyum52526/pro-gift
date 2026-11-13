@@ -19,11 +19,14 @@ export const SITE_CONTACT = {
   email: "quyum52526@gmail.com",
   website: { href: "https://www.progift.com.bd", label: "www.progift.com.bd" },
   facebook: { href: "https://www.facebook.com/progiftbd", label: "facebook.com/progiftbd" },
+  linkedin: { href: "https://www.linkedin.com/company/pro-gift-bd", label: "linkedin.com/company/pro-gift-bd" },
+  instagram: { href: "https://www.instagram.com/pro_gift_bd", label: "instagram.com/pro_gift_bd" },
   areaServed: "Bangladesh",
   social: [
     "https://www.facebook.com/progiftbd",
     "https://www.youtube.com/@PROGIFT-bd",
-    "https://www.linkedin.com/company/144066944",
+    "https://www.linkedin.com/company/pro-gift-bd",
+    "https://www.instagram.com/pro_gift_bd",
   ],
 } as const;
 

@@ -29,6 +29,8 @@ export async function SiteFooter() {
     { label: "Email", value: SITE_CONTACT.email, href: `mailto:${SITE_CONTACT.email}`, external: false },
     { label: "Website", value: SITE_CONTACT.website.label, href: SITE_CONTACT.website.href, external: true },
     { label: "Facebook", value: SITE_CONTACT.facebook.label, href: SITE_CONTACT.facebook.href, external: true },
+    { label: "LinkedIn", value: SITE_CONTACT.linkedin.label, href: SITE_CONTACT.linkedin.href, external: true },
+    { label: "Instagram", value: SITE_CONTACT.instagram.label, href: SITE_CONTACT.instagram.href, external: true },
   ];
 
   return (
