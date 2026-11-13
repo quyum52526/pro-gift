@@ -9,9 +9,8 @@ const post: BlogPost = {
   excerpt: "কর্মী আর ক্লায়েন্টের উপহার কেন আলাদা হওয়া উচিত, কোন গিফট কার জন্য মানানসই, আর বাজেট ভাগ করার সহজ উপায়।",
   publishedAt: "2026-11-13",
   updatedAt: "2026-11-13",
-  // Temporary: the default share image until a real cover is added.
-  coverImage: "/brand/og-image.jpg",
-  coverAlt: "Pro Gift – Premium Corporate Gifts in Bangladesh",
+  coverImage: "/blog/employee-client-gifts-cover.jpg",
+  coverAlt: "কর্মীদের জন্য বোতল, মগ ও পাওয়ার ব্যাংক এবং ক্লায়েন্টের জন্য লেদার ডায়েরি, ডেস্ক সেট ও গিফট বক্স",
   body: [
     {
       type: "p",

@@ -9,9 +9,9 @@ const post: BlogPost = {
     "From shortlisting products to preparing your logo file and approving the branding, here is how a bulk corporate gift order works.",
   publishedAt: "2026-11-13",
   updatedAt: "2026-11-13",
-  // Temporary: the default share image until a real cover is added.
-  coverImage: "/brand/og-image.jpg",
-  coverAlt: "Pro Gift – Premium Corporate Gifts in Bangladesh",
+  coverImage: "/blog/order-guide-cover.jpg",
+  coverAlt:
+    "Corporate gift branding setup with Pro Gift logo on a laptop, logo sheet, navy diary, black bottle and gift box",
   body: [
     {
       type: "p",
