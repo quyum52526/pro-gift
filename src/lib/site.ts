@@ -12,22 +12,40 @@ export const SITE_ADDRESS = {
   mapsEmbed: "https://www.google.com/maps?q=Pro+Gift,+19+Green+Road,+Dhaka+1205&output=embed",
 } as const;
 
+/** Official social profiles. The single source for every social link on the site and the Store JSON-LD sameAs. */
+const SOCIAL_URLS = {
+  facebook: "https://www.facebook.com/progiftbd",
+  instagram: "https://www.instagram.com/pro_gift_bd",
+  youtube: "https://www.youtube.com/@PROGIFT-bd",
+  linkedin: "https://www.linkedin.com/company/pro-gift-bd",
+} as const;
+
+/** Icon-button rows in the footer, on /contact and in the mobile menu. WhatsApp is a chat link, so it is not in sameAs. */
+export const SOCIAL_LINKS = [
+  { platform: "facebook", name: "Facebook", href: SOCIAL_URLS.facebook },
+  { platform: "instagram", name: "Instagram", href: SOCIAL_URLS.instagram },
+  { platform: "youtube", name: "YouTube", href: SOCIAL_URLS.youtube },
+  { platform: "linkedin", name: "LinkedIn", href: SOCIAL_URLS.linkedin },
+  { platform: "whatsapp", name: "WhatsApp", href: `https://wa.me/${WHATSAPP_NUMBER}` },
+] as const;
+
+export type SocialPlatform = (typeof SOCIAL_LINKS)[number]["platform"];
+
+/** "https://www.facebook.com/progiftbd" -> "facebook.com/progiftbd" for visible labels. */
+const displayUrl = (href: string) => href.replace(/^https:\/\/(www\.)?/, "");
+
 /** Public contact details shown in the footer and on /contact. */
 export const SITE_CONTACT = {
   whatsapp: { label: `+${WHATSAPP_NUMBER}` },
   phone: { href: "tel:+8801962434901", label: "+880 1962-434901" },
   email: "quyum52526@gmail.com",
   website: { href: "https://www.progift.com.bd", label: "www.progift.com.bd" },
-  facebook: { href: "https://www.facebook.com/progiftbd", label: "facebook.com/progiftbd" },
-  linkedin: { href: "https://www.linkedin.com/company/pro-gift-bd", label: "linkedin.com/company/pro-gift-bd" },
-  instagram: { href: "https://www.instagram.com/pro_gift_bd", label: "instagram.com/pro_gift_bd" },
+  facebook: { href: SOCIAL_URLS.facebook, label: displayUrl(SOCIAL_URLS.facebook) },
+  linkedin: { href: SOCIAL_URLS.linkedin, label: displayUrl(SOCIAL_URLS.linkedin) },
+  instagram: { href: SOCIAL_URLS.instagram, label: displayUrl(SOCIAL_URLS.instagram) },
   areaServed: "Bangladesh",
-  social: [
-    "https://www.facebook.com/progiftbd",
-    "https://www.youtube.com/@PROGIFT-bd",
-    "https://www.linkedin.com/company/pro-gift-bd",
-    "https://www.instagram.com/pro_gift_bd",
-  ],
+  /** Store JSON-LD sameAs: profiles only. */
+  social: Object.values(SOCIAL_URLS),
 } as const;
 
 export const SITE_NAME = "Pro Gift";

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SocialLinks } from "@/components/ui/social-links";
 import { categoryHref } from "@/lib/catalog/category-filter";
 import type { ProductCategory } from "@/types/product";
 
@@ -67,6 +68,9 @@ export function MobileMenu({ categories }: { categories: ProductCategory[] }) {
             </>
           )}
         </nav>
+        <div className="border-t border-hairline px-5 py-4">
+          <SocialLinks tone="light" />
+        </div>
       </DialogContent>
     </Dialog>
   );

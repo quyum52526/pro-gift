@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
+import { SocialLinks } from "@/components/ui/social-links";
 import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_ADDRESS, SITE_CONTACT } from "@/lib/site";
 import { buildGeneralWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -78,6 +79,10 @@ export default function ContactPage() {
             <p className="text-sm leading-5 text-muted-foreground">
               Service area: All of {SITE_CONTACT.areaServed}
             </p>
+            <div className="flex flex-col gap-3">
+              <h2 className="text-xs font-semibold tracking-[0.08em] text-teal uppercase">Follow us</h2>
+              <SocialLinks tone="light" className="-ml-0.5" />
+            </div>
           </section>
 
           <section aria-label="Map" className="overflow-hidden rounded-2xl border border-hairline bg-surface-tint">

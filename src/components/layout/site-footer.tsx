@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cacheLife } from "next/cache";
 
+import { SocialLinks } from "@/components/ui/social-links";
 import { getCategories } from "@/data/products";
 import { categoryHref } from "@/lib/catalog/category-filter";
 import { SITE_ADDRESS, SITE_CONTACT } from "@/lib/site";
@@ -86,6 +87,7 @@ export async function SiteFooter() {
             <Link href="/contact" className="pg-flink self-start font-semibold">
               Contact
             </Link>
+            <SocialLinks tone="dark" className="-ml-0.5 mt-1" />
           </div>
 
           <nav aria-label="Footer gift categories" className="flex min-w-0 flex-[1_1_200px] flex-col gap-3.5">
