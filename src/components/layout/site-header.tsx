@@ -6,6 +6,7 @@ import { getCategories } from "@/data/products";
 import { buildGeneralWhatsAppUrl } from "@/lib/whatsapp";
 import { CategoryTabs, CategoryTabsFallback } from "./category-tabs";
 import { HeaderHeight } from "./header-height";
+import { MobileMenu } from "./mobile-menu";
 
 // Layout from the Claude Design canvas "Pro Gift — 3D Header, Hero & Footer".
 export async function SiteHeader() {
@@ -63,6 +64,7 @@ export async function SiteHeader() {
             >
               Talk to us
             </a>
+            <MobileMenu categories={categories} />
           </div>
         </div>
         {categories.length > 0 && (
