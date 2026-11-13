@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { blogHref, formatPostDate, getAllPosts } from "@/content/blog";
+import { blogHref, coverFitClass, formatPostDate, getAllPosts } from "@/content/blog";
 import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS } from "@/lib/site";
 
 const TITLE = "Corporate Gift Ideas & Guides | Pro Gift Blog";
@@ -46,7 +46,7 @@ export default function BlogIndexPage() {
                     width={1200}
                     height={630}
                     sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
-                    className="block aspect-[1200/630] h-auto w-full object-contain"
+                    className={`block aspect-[1200/630] h-auto w-full ${coverFitClass(post.coverImage)}`}
                   />
                 </Link>
                 <div className="flex flex-1 flex-col gap-3 p-5">

@@ -19,6 +19,15 @@ export function blogHref(slug: string): string {
   return `/blog/${slug}`;
 }
 
+/** SVG covers are portrait product art, so show them whole; photo covers fill the banner. */
+export function isSvgCover(src: string): boolean {
+  return src.endsWith(".svg");
+}
+
+export function coverFitClass(src: string): string {
+  return isSvgCover(src) ? "object-contain" : "object-cover";
+}
+
 /** "13 November 2026". UTC so the server's zone never shifts the day. */
 export function formatPostDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(

@@ -9,8 +9,8 @@ const post: BlogPost = {
     "Useful, logo-branded gift ideas for employees and clients at year-end, plus how to plan a bulk corporate gift order in Bangladesh.",
   publishedAt: "2026-11-13",
   updatedAt: "2026-11-13",
-  coverImage: "/products/executive-gift-set-box.svg",
-  coverAlt: "Open black presentation box with diary, pen and card holder",
+  coverImage: "/blog/year-end-cover.jpg",
+  coverAlt: "Year-end corporate gift set with a navy leather diary, pen, power bank, thermal bottle and gift box",
   body: [
     {
       type: "p",

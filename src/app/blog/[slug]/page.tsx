@@ -7,7 +7,15 @@ import { ChevronRight } from "lucide-react";
 import { getCategories } from "@/data/products";
 import { InlineText } from "@/components/blog/inline-text";
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
-import { type BlogBlock, blogHref, formatPostDate, getAllPosts, getPost } from "@/content/blog";
+import {
+  type BlogBlock,
+  blogHref,
+  coverFitClass,
+  formatPostDate,
+  getAllPosts,
+  getPost,
+  isSvgCover,
+} from "@/content/blog";
 import { categoryHref } from "@/lib/catalog/category-filter";
 import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import { buildGeneralWhatsAppUrl } from "@/lib/whatsapp";
@@ -24,6 +32,8 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   if (!post) return {};
 
   const path = blogHref(post.slug);
+  // Social sites reject SVG previews, so SVG covers fall back to the default share image.
+  const shareImage = isSvgCover(post.coverImage) ? DEFAULT_OG_IMAGE : { url: post.coverImage, alt: post.coverAlt };
   return {
     title: post.title,
     description: post.metaDescription,
@@ -38,8 +48,13 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       authors: [AUTHOR],
-      // Social sites reject SVG previews, so SVG covers fall back to the default share image.
-      images: [post.coverImage.endsWith(".svg") ? DEFAULT_OG_IMAGE : { url: post.coverImage, alt: post.coverAlt }],
+      images: [shareImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.metaDescription,
+      images: [shareImage],
     },
   };
 }
@@ -179,7 +194,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
               height={630}
               priority
               sizes="(min-width: 820px) 772px, 100vw"
-              className="mt-2 block aspect-[1200/630] h-auto w-full rounded-2xl bg-surface-tint object-contain"
+              className={`mt-2 block aspect-[1200/630] h-auto w-full rounded-2xl bg-surface-tint ${coverFitClass(post.coverImage)}`}
             />
           </header>
 
