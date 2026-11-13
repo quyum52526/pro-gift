@@ -64,6 +64,12 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  /* Bangla blog content (lib/fonts.ts). Hind Siliguri comes first: Poppins' Devanagari face also
+     claims the danda (।) and ZWJ/ZWNJ, which would split Bangla text across two fonts. */
+  :lang(bn) {
+    font-family: var(--font-bangla), var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  }
 }
 
 /*

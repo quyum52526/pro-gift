@@ -14,8 +14,12 @@ export interface BlogFaq {
   answer: string;
 }
 
+export type BlogLang = "en" | "bn";
+
 export interface BlogPost {
   slug: string;
+  /** Article language. Defaults to "en". */
+  lang?: BlogLang;
   title: string;
   /** 150-160 characters. */
   metaDescription: string;

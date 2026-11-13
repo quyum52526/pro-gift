@@ -9,18 +9,47 @@ import { InlineText } from "@/components/blog/inline-text";
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import {
   type BlogBlock,
+  type BlogLang,
   blogHref,
   coverFitClass,
   formatPostDate,
   getAllPosts,
   getPost,
   isSvgCover,
+  postLang,
 } from "@/content/blog";
+import { hindSiliguri } from "@/lib/fonts";
 import { categoryHref } from "@/lib/catalog/category-filter";
 import { DEFAULT_OG_IMAGE, OPEN_GRAPH_DEFAULTS, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import { buildGeneralWhatsAppUrl } from "@/lib/whatsapp";
 
 const AUTHOR = "Pro Gift Team";
+
+/** Fixed UI text inside an article, per article language. The breadcrumb stays English. */
+const LABELS: Record<BlogLang, Record<string, string>> = {
+  en: {
+    by: "By",
+    author: AUTHOR,
+    published: "Published",
+    updated: "Updated",
+    faq: "Frequently asked questions",
+    related: "Related categories",
+    ctaHeading: "Need corporate gifts with your logo?",
+    ctaText: "Tell us your budget and quantity. We reply with options and a quote.",
+    ctaButton: "Get a quote on WhatsApp",
+  },
+  bn: {
+    by: "লিখেছেন:",
+    author: "Pro Gift টিম",
+    published: "প্রকাশিত",
+    updated: "আপডেট",
+    faq: "সাধারণ প্রশ্ন",
+    related: "সংশ্লিষ্ট ক্যাটাগরি",
+    ctaHeading: "লোগোসহ কর্পোরেট গিফট দরকার?",
+    ctaText: "আপনার বাজেট আর পরিমাণ জানান। আমরা অপশন আর কোটেশন পাঠাব।",
+    ctaButton: "WhatsApp-এ কোটেশন নিন",
+  },
+};
 
 export function generateStaticParams() {
   return getAllPosts().map((post) => ({ slug: post.slug }));
@@ -41,6 +70,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
     authors: [{ name: AUTHOR }],
     openGraph: {
       ...OPEN_GRAPH_DEFAULTS,
+      ...(postLang(post) === "bn" && { locale: "bn_BD" }),
       type: "article",
       title: post.title,
       description: post.metaDescription,
@@ -101,6 +131,11 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
   const pageUrl = `${SITE_URL}${blogHref(post.slug)}`;
   const whatsappUrl = buildGeneralWhatsAppUrl();
   const updated = post.updatedAt !== post.publishedAt;
+  const lang = postLang(post);
+  const bn = lang === "bn";
+  const t = LABELS[lang];
+  // Bangla has no case and letter-spacing pulls its conjuncts apart, so the small-caps label style is English only.
+  const eyebrow = bn ? "" : "tracking-[0.08em] uppercase";
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -119,6 +154,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
     image: [absoluteUrl(post.coverImage)],
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
+    inLanguage: lang,
     mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
     author: { "@type": "Organization", name: AUTHOR, url: SITE_URL },
     publisher: {
@@ -167,90 +203,102 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
               </li>
             ))}
             <li className="min-w-0">
-              <span aria-current="page" className="block truncate text-ink">
+              <span
+                aria-current="page"
+                lang={bn ? "bn" : undefined}
+                className={`block truncate text-ink ${bn ? hindSiliguri.variable : ""}`}
+              >
                 {post.title}
               </span>
             </li>
           </ol>
         </nav>
 
-        <article className="mt-6">
-          <header className="flex flex-col gap-4">
-            <h1 className="text-[clamp(28px,4.2vw,40px)] leading-[1.2] font-bold text-ink">{post.title}</h1>
-            <p className="text-sm leading-6 text-muted-foreground">
-              By <span className="font-semibold text-ink">{AUTHOR}</span> · Published{" "}
-              <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
-              {updated && (
-                <>
-                  {" "}
-                  · Updated <time dateTime={post.updatedAt}>{formatPostDate(post.updatedAt)}</time>
-                </>
-              )}
-            </p>
-            <Image
-              src={post.coverImage}
-              alt={post.coverAlt}
-              width={1200}
-              height={630}
-              priority
-              sizes="(min-width: 820px) 772px, 100vw"
-              className={`mt-2 block aspect-[1200/630] h-auto w-full rounded-2xl bg-surface-tint ${coverFitClass(post.coverImage)}`}
-            />
-          </header>
+        {/* lang + the font variable scope the Bangla font to this content (see globals.css :lang(bn)). */}
+        <div lang={bn ? "bn" : undefined} className={bn ? hindSiliguri.variable : undefined}>
+          <article className="mt-6">
+            <header className="flex flex-col gap-4">
+              <h1
+                className={`text-[clamp(28px,4.2vw,40px)] font-bold text-ink ${bn ? "leading-[1.4]" : "leading-[1.2]"}`}
+              >
+                {post.title}
+              </h1>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {t.by} <span className="font-semibold text-ink">{t.author}</span> · {t.published}{" "}
+                <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt, lang)}</time>
+                {updated && (
+                  <>
+                    {" "}
+                    · {t.updated} <time dateTime={post.updatedAt}>{formatPostDate(post.updatedAt, lang)}</time>
+                  </>
+                )}
+              </p>
+              <Image
+                src={post.coverImage}
+                alt={post.coverAlt}
+                width={1200}
+                height={630}
+                priority
+                sizes="(min-width: 820px) 772px, 100vw"
+                className={`mt-2 block aspect-[1200/630] h-auto w-full rounded-2xl bg-surface-tint ${coverFitClass(post.coverImage)}`}
+              />
+            </header>
 
-          <div className="mt-8 flex flex-col gap-5 text-base leading-7 text-ink/90">
-            {post.body.map((block, index) => (
-              <Block key={index} block={block} />
-            ))}
-          </div>
-        </article>
-
-        {post.faqs?.length ? (
-          <section aria-labelledby="post-faq" className="mt-14">
-            <h2 id="post-faq" className="text-xl font-bold text-ink">
-              Frequently asked questions
-            </h2>
-            <dl className="mt-5 flex flex-col gap-4">
-              {post.faqs.map((faq) => (
-                <div key={faq.question} className="rounded-2xl bg-surface-tint p-5">
-                  <dt className="font-semibold text-ink">{faq.question}</dt>
-                  <dd className="mt-2 text-sm leading-6 text-muted-foreground">{faq.answer}</dd>
-                </div>
+            <div className="mt-8 flex flex-col gap-5 text-base leading-7 text-ink/90">
+              {post.body.map((block, index) => (
+                <Block key={index} block={block} />
               ))}
-            </dl>
-          </section>
-        ) : null}
+            </div>
+          </article>
 
-        {related.length > 0 && (
-          <nav aria-labelledby="related-categories" className="mt-14">
-            <h2 id="related-categories" className="text-xs font-semibold tracking-[0.08em] text-teal uppercase">
-              Related categories
-            </h2>
-            <ul className="mt-4 flex flex-wrap gap-3">
-              {related.map((category) => (
-                <li key={category.slug}>
-                  <Link href={categoryHref(category.slug)} className="pg-btn pg-btn-line">
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
+          {post.faqs?.length ? (
+            <section aria-labelledby="post-faq" className="mt-14">
+              <h2 id="post-faq" className="text-xl font-bold text-ink">
+                {t.faq}
+              </h2>
+              <dl className="mt-5 flex flex-col gap-4">
+                {post.faqs.map((faq) => (
+                  <div key={faq.question} className="rounded-2xl bg-surface-tint p-5">
+                    <dt className="font-semibold text-ink">{faq.question}</dt>
+                    <dd className="mt-2 text-sm leading-6 text-muted-foreground">{faq.answer}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
 
-        <aside className="mt-14 flex flex-col items-start gap-4 rounded-2xl bg-ink p-6 text-surface sm:p-8">
-          <h2 className="text-2xl leading-snug font-bold">Need corporate gifts with your logo?</h2>
-          <p className="text-base leading-6">Tell us your budget and quantity. We reply with options and a quote.</p>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pg-btn mt-1 bg-whatsapp text-surface shadow-[0_5px_0_var(--color-whatsapp-dark)] hover:shadow-[0_8px_0_var(--color-whatsapp-dark)]"
-          >
-            <WhatsAppIcon className="size-5" />
-            Get a quote on WhatsApp
-          </a>
-        </aside>
+          {related.length > 0 && (
+            <nav aria-labelledby="related-categories" className="mt-14">
+              <h2 id="related-categories" className={`text-xs font-semibold text-teal ${eyebrow}`}>
+                {t.related}
+              </h2>
+              {/* Category names are English. */}
+              <ul lang={bn ? "en" : undefined} className="mt-4 flex flex-wrap gap-3">
+                {related.map((category) => (
+                  <li key={category.slug}>
+                    <Link href={categoryHref(category.slug)} className="pg-btn pg-btn-line">
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
+          <aside className="mt-14 flex flex-col items-start gap-4 rounded-2xl bg-ink p-6 text-surface sm:p-8">
+            <h2 className="text-2xl leading-snug font-bold">{t.ctaHeading}</h2>
+            <p className="text-base leading-6">{t.ctaText}</p>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pg-btn mt-1 bg-whatsapp text-surface shadow-[0_5px_0_var(--color-whatsapp-dark)] hover:shadow-[0_8px_0_var(--color-whatsapp-dark)]"
+            >
+              <WhatsAppIcon className="size-5" />
+              {t.ctaButton}
+            </a>
+          </aside>
+        </div>
       </div>
     </main>
   );
