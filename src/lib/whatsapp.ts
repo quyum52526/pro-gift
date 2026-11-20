@@ -62,6 +62,7 @@ export interface GiftBoxOrder {
   lines: { name: string; code: string; quantity: number; unitPrice: number; total: number }[];
   total: number;
   withLogo: boolean;
+  logoFileName?: string;
   /** Page showing this exact box, so the sales team can review it in one click. */
   viewUrl?: string;
 }
@@ -81,7 +82,12 @@ export function buildGiftBoxWhatsAppUrl(order: GiftBoxOrder): string {
     "",
     `Estimated total: from ${formatBDT(order.total)}`,
   ];
-  if (order.withLogo) lines.push("Branding: I'll share my logo file in this chat.");
+  lines.push(
+    "",
+    order.withLogo
+      ? `Branding: logo added in the preview${order.logoFileName ? ` (${order.logoFileName})` : ""}. I'll attach the logo file in this chat.`
+      : "Branding: I'll attach my logo file in this chat if I want it printed.",
+  );
   if (order.viewUrl) lines.push("", `View this box: ${order.viewUrl}`);
   lines.push("", "Please confirm pricing and delivery time. Thank you!");
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;

@@ -28,6 +28,8 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
   const { box, lines, itemCount, total } = summarizeGiftBox(config, catalogue);
   const isFull = itemCount >= box.capacity;
   const logoUrl = config.logo?.dataUrl;
+  const summaryRef = React.useRef<HTMLElement>(null);
+  const summaryVisible = useOnScreen(summaryRef);
   const inquiryUrl = buildGiftBoxWhatsAppUrl({
     boxName: box.name,
     boxPrice: box.price,
@@ -40,6 +42,7 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
     })),
     total,
     withLogo: config.logo !== null,
+    logoFileName: config.logo?.fileName,
     // The link only renders with items in the box, which never happens on the server.
     viewUrl: typeof window === "undefined" ? undefined : buildGiftBoxViewUrl(window.location.origin, config),
   });
@@ -122,8 +125,12 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
             )}
           </section>
 
-          <section aria-labelledby="logo-heading">
+          <section id="gift-box-logo" aria-labelledby="logo-heading" className="scroll-mt-4">
             <StepHeading id="logo-heading" step={3} title="Add your logo" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Optional. Upload it to see it on the box and products under &ldquo;Your logo here&rdquo;. WhatsApp
+              can&apos;t carry the file automatically, so attach your logo in the chat when you send the inquiry.
+            </p>
             <LogoUpload />
           </section>
         </div>
@@ -132,7 +139,12 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
         <div className="contents lg:sticky lg:top-[calc(var(--header-h,160px)+1rem)] lg:block lg:min-w-0 lg:space-y-4">
           <GiftBoxPreviewPanel config={config} catalogue={catalogue} className="order-first min-w-0 lg:order-none" />
 
-          <section aria-labelledby="summary-heading" className="rounded-2xl border bg-surface p-5 shadow-card">
+          <section
+            ref={summaryRef}
+            id="gift-box-summary"
+            aria-labelledby="summary-heading"
+            className="min-w-0 scroll-mt-4 rounded-2xl border bg-surface p-4 shadow-card sm:p-5"
+          >
             <h2 id="summary-heading" className="font-semibold text-ink">
               Your gift box
             </h2>
@@ -169,6 +181,18 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
                   <span className="w-16 shrink-0 text-right tabular-nums text-ink">{formatBDT(lineTotal)}</span>
                 </li>
               ))}
+              <li className="flex items-center justify-between gap-3 py-2">
+                <span className="text-ink">Logo</span>
+                {config.logo ? (
+                  <span className="min-w-0 truncate text-right text-muted-foreground" title={config.logo.fileName}>
+                    {config.logo.fileName}
+                  </span>
+                ) : (
+                  <a href="#gift-box-logo" className="shrink-0 font-medium text-teal underline-offset-2 hover:underline">
+                    Add your logo
+                  </a>
+                )}
+              </li>
             </ul>
             <div className="mt-2 flex items-baseline justify-between border-t pt-3">
               <span className="font-semibold text-ink">Estimated total</span>
@@ -195,11 +219,11 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
                     <WhatsAppIcon className="h-5 w-5" /> Send Inquiry via WhatsApp
                   </a>
                 </Button>
-                {config.logo && (
-                  <p className="mt-3 text-center text-xs text-muted-foreground">
-                    Please attach your logo file to the chat, as it can&apos;t be sent automatically.
-                  </p>
-                )}
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  {config.logo
+                    ? "Please attach your logo file to the chat, as it can't be sent automatically."
+                    : "Want it branded? Attach your logo file in the WhatsApp chat."}
+                </p>
               </>
             )}
             <Link href="/#catalog" className="pg-btn pg-btn-line mt-4 w-full">
@@ -211,8 +235,84 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
           </section>
         </div>
       </div>
+
+      <MobileSummaryBar
+        hidden={summaryVisible}
+        itemCount={itemCount}
+        capacity={box.capacity}
+        total={total}
+        inquiryUrl={inquiryUrl}
+      />
     </div>
   );
+}
+
+/**
+ * Phone and tablet bar that keeps the total and the WhatsApp inquiry in reach while scrolling
+ * the long product list. It steps aside once the full summary is on screen.
+ */
+function MobileSummaryBar({
+  hidden,
+  itemCount,
+  capacity,
+  total,
+  inquiryUrl,
+}: {
+  hidden: boolean;
+  itemCount: number;
+  capacity: number;
+  total: number;
+  inquiryUrl: string;
+}) {
+  return (
+    <>
+      {/* In-flow spacer so the fixed bar never covers the footer. */}
+      <div aria-hidden className="h-[calc(76px+env(safe-area-inset-bottom))] lg:hidden" />
+      <div
+        aria-hidden={hidden}
+        inert={hidden}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-surface/95 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-6px_20px_-10px_rgb(29_29_29/0.25)] backdrop-blur-md transition-transform duration-200 lg:hidden",
+          hidden && "translate-y-full",
+        )}
+      >
+        <div className="mx-auto flex max-w-[640px] items-center gap-2">
+          <a href="#gift-box-summary" className="min-w-0 flex-1 rounded-lg px-1 py-0.5">
+            <span className="block truncate text-xs text-muted-foreground tabular-nums">
+              {itemCount} of {capacity} items · Review box
+            </span>
+            <span className="block text-lg leading-tight font-bold text-teal tabular-nums">{formatBDT(total)}</span>
+          </a>
+          {itemCount === 0 ? (
+            <Button variant="whatsapp" disabled className="shrink-0">
+              <WhatsAppIcon className="h-5 w-5" /> Send Inquiry
+            </Button>
+          ) : (
+            <Button asChild variant="whatsapp" className="shrink-0">
+              <a href={inquiryUrl} target="_blank" rel="noopener noreferrer">
+                <WhatsAppIcon className="h-5 w-5" /> Send Inquiry
+              </a>
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** True while the element is at least partly on screen. */
+function useOnScreen(ref: React.RefObject<HTMLElement | null>) {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
+      rootMargin: "0px 0px -80px 0px",
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref]);
+  return visible;
 }
 
 interface GiftItemCardProps {
