@@ -21,7 +21,8 @@ export async function SiteHeader() {
     // content legible as it scrolls underneath.
     <header
       id="top"
-      className="sticky top-0 z-50 border-b border-hairline bg-surface-tint/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-surface-tint/75"
+      // overflow-x-clip: the 3D entrance animation (.pg-head-in) is briefly wider than a phone screen.
+      className="sticky top-0 z-50 overflow-x-clip border-b border-hairline bg-surface-tint/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-surface-tint/75"
     >
       <HeaderHeight />
       {/* Gold accent rule with a travelling light reflection */}

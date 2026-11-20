@@ -60,6 +60,8 @@
   }
 
   body {
+    /* Safety net against sideways scroll on phones; `clip` (unlike `hidden`) keeps sticky elements working. */
+    overflow-x: clip;
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);

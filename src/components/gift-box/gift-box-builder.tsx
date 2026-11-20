@@ -54,9 +54,14 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
         Choose a box, fill it with products and add your logo. The preview and price update as you go.
       </p>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-start">
-        <div className="min-w-0 space-y-8">
-          <section aria-labelledby="box-heading">
+      {/*
+        Phones: one column ordered preview → box → logo → summary → products, with the preview stuck
+        under the header so the box stays in frame while products are added.
+        Desktop: steps on the left, preview and summary in a sticky column on the right.
+      */}
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-start">
+        <div className="contents lg:block lg:min-w-0 lg:space-y-8">
+          <section aria-labelledby="box-heading" className="order-2 min-w-0 lg:order-none">
             <StepHeading id="box-heading" step={1} title="Choose your box" />
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {GIFT_BOXES.map((option) => {
@@ -94,9 +99,22 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
             </div>
           </section>
 
-          <section aria-labelledby="items-heading">
+          <section
+            id="gift-box-logo"
+            aria-labelledby="logo-heading"
+            className="order-3 min-w-0 scroll-mt-[calc(26svh+2.5rem)] lg:order-none lg:scroll-mt-4"
+          >
+            <StepHeading id="logo-heading" step={2} title="Add your logo" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Optional. Upload it to see it on the box and products under &ldquo;Your logo here&rdquo;. WhatsApp
+              can&apos;t carry the file automatically, so attach your logo in the chat when you send the inquiry.
+            </p>
+            <LogoUpload />
+          </section>
+
+          <section aria-labelledby="items-heading" className="order-5 min-w-0 lg:order-none">
             <div className="flex items-baseline justify-between gap-3">
-              <StepHeading id="items-heading" step={2} title="Add products" />
+              <StepHeading id="items-heading" step={3} title="Add products" />
               <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
                 {itemCount} of {box.capacity} added
               </p>
@@ -124,26 +142,23 @@ export function GiftBoxBuilder({ catalogue }: { catalogue: GiftItem[] }) {
               </p>
             )}
           </section>
-
-          <section id="gift-box-logo" aria-labelledby="logo-heading" className="scroll-mt-4">
-            <StepHeading id="logo-heading" step={3} title="Add your logo" />
-            <p className="mt-2 text-sm text-muted-foreground">
-              Optional. Upload it to see it on the box and products under &ldquo;Your logo here&rdquo;. WhatsApp
-              can&apos;t carry the file automatically, so attach your logo in the chat when you send the inquiry.
-            </p>
-            <LogoUpload />
-          </section>
         </div>
 
-        {/* Flattened on phones so the preview leads the page and the summary follows the steps. */}
         <div className="contents lg:sticky lg:top-[calc(var(--header-h,160px)+1rem)] lg:block lg:min-w-0 lg:space-y-4">
-          <GiftBoxPreviewPanel config={config} catalogue={catalogue} className="order-first min-w-0 lg:order-none" />
+          {/* Solid backing so content scrolling under the stuck preview doesn't show through. */}
+          <div className="sticky top-[var(--header-h,120px)] z-20 order-1 -mx-4 min-w-0 bg-background px-4 pt-2 pb-2 sm:-mx-6 sm:px-6 lg:static lg:order-none lg:mx-0 lg:bg-transparent lg:p-0">
+            <GiftBoxPreviewPanel
+              config={config}
+              catalogue={catalogue}
+              className="min-w-0 [&_svg]:max-h-[26svh] lg:[&_svg]:max-h-none"
+            />
+          </div>
 
           <section
             ref={summaryRef}
             id="gift-box-summary"
             aria-labelledby="summary-heading"
-            className="min-w-0 scroll-mt-4 rounded-2xl border bg-surface p-4 shadow-card sm:p-5"
+            className="order-4 min-w-0 scroll-mt-[calc(26svh+2.5rem)] rounded-2xl border bg-surface p-4 shadow-card sm:p-5 lg:order-none lg:scroll-mt-4"
           >
             <h2 id="summary-heading" className="font-semibold text-ink">
               Your gift box
