@@ -12,6 +12,7 @@ const PAGES = [
   { name: "Blog", href: "/blog" },
   { name: "Contact", href: "/contact" },
   { name: "Build a Gift Box", href: "/gift-box" },
+  { name: "Vendor login / enlist", href: "/vendor" },
 ];
 
 /**

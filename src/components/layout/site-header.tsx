@@ -21,7 +21,8 @@ export async function SiteHeader() {
     // content legible as it scrolls underneath.
     <header
       id="top"
-      className="sticky top-0 z-50 border-b border-hairline bg-surface-tint/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-surface-tint/75"
+      // overflow-x-clip: the 3D entrance animation (.pg-head-in) is briefly wider than a phone screen.
+      className="sticky top-0 z-50 overflow-x-clip border-b border-hairline bg-surface-tint/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-surface-tint/75"
     >
       <HeaderHeight />
       {/* Gold accent rule with a travelling light reflection */}
@@ -51,6 +52,14 @@ export async function SiteHeader() {
               className="hidden px-2 text-xs leading-4 font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:text-teal sm:inline-flex"
             >
               Contact
+            </Link>
+            {/* Vendor enlistment and sign-in. Phones reach it from the menu. */}
+            <Link
+              href="/vendor"
+              rel="nofollow"
+              className="hidden px-2 text-xs leading-4 font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:text-teal sm:inline-flex"
+            >
+              Vendor
             </Link>
             {/* No room beside the logo on phones; the home page band links here instead. */}
             <Link href="/gift-box" className="pg-btn pg-btn-line hidden md:inline-flex">
