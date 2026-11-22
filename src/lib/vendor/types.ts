@@ -15,6 +15,8 @@ export interface VendorRow {
   logo_path: string | null;
   address: string;
   whatsapp: string;
+  email: string | null;
+  email_verified_at: string | null;
   description: string;
   is_active: boolean;
   created_at: string;
@@ -59,7 +61,7 @@ export interface VendorSearchRow {
 }
 
 export const VENDOR_COLUMNS =
-  "id, code, business_name, logo_path, address, whatsapp, description, is_active, created_at, updated_at";
+  "id, code, business_name, logo_path, address, whatsapp, email, email_verified_at, description, is_active, created_at, updated_at";
 
 /** What the vendor page and cards render. */
 export interface VendorProfile {
@@ -69,7 +71,10 @@ export interface VendorProfile {
   logoUrl: string | null;
   logoPath: string | null;
   address: string;
+  /** Digits only (8801XXXXXXXXX). Also the vendor's sign-in ID. */
   whatsapp: string;
+  email: string | null;
+  emailVerified: boolean;
   description: string;
   isActive: boolean;
   createdAt: string;
@@ -107,6 +112,8 @@ export function rowToVendor(row: VendorRow): VendorProfile {
     logoPath: row.logo_path,
     address: row.address,
     whatsapp: row.whatsapp,
+    email: row.email ?? null,
+    emailVerified: Boolean(row.email_verified_at),
     description: row.description,
     isActive: row.is_active,
     createdAt: row.created_at,
@@ -161,6 +168,8 @@ export function searchRowToHit(row: VendorSearchRow): { product: VendorProduct; 
       logoPath: row.vendor_logo_path,
       address: row.vendor_address,
       whatsapp: row.vendor_whatsapp,
+      email: null,
+      emailVerified: false,
       description: "",
       isActive: row.vendor_active,
       createdAt: "",

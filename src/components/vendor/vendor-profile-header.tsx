@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin, Store } from "lucide-react";
+import { Mail, MapPin, Store } from "lucide-react";
 
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,7 @@ interface VendorProfileHeaderProps {
   showContact?: boolean;
 }
 
-/** Top of a vendor page: logo, business name, vendor ID, address and contact. */
+/** Top of a vendor page: logo, business name, WhatsApp (sign-in ID), email, address and contact. */
 export function VendorProfileHeader({ vendor, productCount, actions, showContact }: VendorProfileHeaderProps) {
   return (
     <section className="overflow-hidden rounded-2xl border bg-surface shadow-card">
@@ -42,15 +42,22 @@ export function VendorProfileHeader({ vendor, productCount, actions, showContact
             {!vendor.isActive && <Badge variant="outline">Disabled</Badge>}
           </div>
           <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            <span>
-              Vendor ID <span className="font-mono font-medium text-ink">{vendor.code}</span>
+            <span className="inline-flex items-center gap-1">
+              <WhatsAppIcon className="h-3.5 w-3.5 text-whatsapp" />
+              <span className="font-medium text-ink">{formatWhatsAppNumber(vendor.whatsapp)}</span>
             </span>
+            {vendor.email && (
+              <span className="inline-flex min-w-0 items-center gap-1">
+                <Mail className="h-3.5 w-3.5 shrink-0 text-teal" aria-hidden />
+                <span className="break-all">{vendor.email}</span>
+                {!vendor.emailVerified && <span className="text-xs">(not confirmed)</span>}
+              </span>
+            )}
             <span>
               {productCount} {productCount === 1 ? "product" : "products"}
             </span>
-            <span className="inline-flex items-center gap-1">
-              <WhatsAppIcon className="h-3.5 w-3.5 text-whatsapp" />
-              {formatWhatsAppNumber(vendor.whatsapp)}
+            <span>
+              Ref <span className="font-mono">{vendor.code}</span>
             </span>
           </p>
           {vendor.address && (

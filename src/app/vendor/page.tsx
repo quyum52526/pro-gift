@@ -10,6 +10,7 @@ import { VendorProfileHeader } from "@/components/vendor/vendor-profile-header";
 import { Button } from "@/components/ui/button";
 import { listOwnProducts } from "@/lib/vendor/queries";
 import { getVendorSession, type VendorSession } from "@/lib/vendor/session";
+import { formatWhatsAppNumber } from "@/lib/vendor/whatsapp";
 
 export const metadata: Metadata = { title: "Vendor portal" };
 
@@ -48,7 +49,7 @@ function SignedOut({ initialTab }: { initialTab: "signin" | "enlist" }) {
         <ul className="mt-6 flex flex-col gap-3 text-sm text-ink">
           <li className="flex gap-2">
             <UserRound className="h-5 w-5 shrink-0 text-gold-deep" aria-hidden />
-            Enlist once and get your own Vendor ID to sign in with.
+            Enlist with your WhatsApp number and email, then sign in with that number.
           </li>
           <li className="flex gap-2">
             <PackageOpen className="h-5 w-5 shrink-0 text-gold-deep" aria-hidden />
@@ -69,6 +70,7 @@ const SAVED_MESSAGES: Record<string, string> = {
   profile: "Profile saved.",
   product: "Product saved.",
   deleted: "Product deleted.",
+  password: "Password reset. You're signed in, and other devices were signed out.",
 };
 
 async function Dashboard({
@@ -92,8 +94,11 @@ async function Dashboard({
         <div role="status" className="rounded-2xl border border-gold/50 bg-gold/10 px-5 py-4 text-ink">
           <p className="font-semibold">Welcome to Pro Gift! Your vendor profile is ready.</p>
           <p className="mt-1 text-sm">
-            Your Vendor ID is <span className="font-mono text-base font-bold">{vendor.code}</span>. Write it down: you
-            need it with your password to sign in.
+            Sign in next time with your WhatsApp number{" "}
+            <span className="font-mono text-base font-bold whitespace-nowrap">
+              {formatWhatsAppNumber(vendor.whatsapp)}
+            </span>{" "}
+            and your password.
           </p>
         </div>
       )}
@@ -106,6 +111,18 @@ async function Dashboard({
           Your logo couldn&apos;t be uploaded.
           <Link href="/vendor/profile" className="font-medium underline">
             Try again from your profile.
+          </Link>
+        </p>
+      )}
+      {!vendor.email && (
+        <p
+          role="alert"
+          className="flex flex-wrap items-center gap-1.5 rounded-xl border border-gold/50 bg-gold/10 px-4 py-3 text-sm text-ink"
+        >
+          <TriangleAlert className="h-4 w-4 text-gold-deep" aria-hidden />
+          Add an email to your profile so you can reset a forgotten password.
+          <Link href="/vendor/profile" className="font-medium underline">
+            Add email
           </Link>
         </p>
       )}

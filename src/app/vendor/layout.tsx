@@ -37,7 +37,9 @@ async function SignedInActions() {
   if (!session) return null;
   return (
     <div className="flex items-center gap-3">
-      <span className="hidden font-mono text-xs text-surface/70 sm:inline">{session.vendor.code}</span>
+      <span className="hidden max-w-[16rem] truncate text-xs text-surface/70 sm:inline">
+        {session.vendor.businessName}
+      </span>
       <form action={signOutVendor}>
         <Button
           type="submit"

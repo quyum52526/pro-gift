@@ -10,6 +10,9 @@ type FieldErrors = Partial<Record<string, string>>;
 /** Storage path written by uploadVendorImage: <ticket uuid>/<file uuid>.<ext> */
 export const VENDOR_IMAGE_PATH = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/;
 export const VENDOR_CODE = /^PGV-[A-Z0-9]{6}$/;
+export const OTP_CODE = /^\d{6}$/;
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function text(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -35,8 +38,31 @@ export interface VendorProfileInput {
   business_name: string;
   address: string;
   whatsapp: string;
+  email: string;
   description: string;
   logo_path: string | null;
+}
+
+export function parseEmail(value: string): string | null {
+  const email = value.trim().toLowerCase();
+  return email.length <= 254 && EMAIL.test(email) ? email : null;
+}
+
+/** Sign-in ID: a WhatsApp number in any common format, or an older PGV-XXXXXX code. */
+export function parseVendorLogin(value: string): string | null {
+  const trimmed = value.trim();
+  if (VENDOR_CODE.test(trimmed.toUpperCase())) return trimmed.toUpperCase();
+  return normalizeWhatsAppNumber(trimmed);
+}
+
+export function parseRequestId(formData: FormData): string | null {
+  const value = text(formData, "request_id");
+  return UUID.test(value) ? value : null;
+}
+
+export function parseOtpCode(formData: FormData): string | null {
+  const value = text(formData, "otp").replace(/\s+/g, "");
+  return OTP_CODE.test(value) ? value : null;
 }
 
 /** Fields shared by the enlistment form and the profile editor. */
@@ -57,6 +83,9 @@ export function parseVendorProfileForm(
   const whatsapp = normalizeWhatsAppNumber(text(formData, "whatsapp"));
   if (!whatsapp) fieldErrors.whatsapp = "Enter a WhatsApp number, e.g. 01712-345678 or +8801712345678.";
 
+  const email = parseEmail(text(formData, "email"));
+  if (!email) fieldErrors.email = "Enter your email address, e.g. name@company.com.";
+
   const description = text(formData, "description");
   if (description.length > 2000) fieldErrors.description = "Keep the details under 2000 characters.";
 
@@ -66,7 +95,7 @@ export function parseVendorProfileForm(
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };
   return {
     ok: true,
-    data: { business_name, address, whatsapp: whatsapp!, description, logo_path: logo || null },
+    data: { business_name, address, whatsapp: whatsapp!, email: email!, description, logo_path: logo || null },
   };
 }
 

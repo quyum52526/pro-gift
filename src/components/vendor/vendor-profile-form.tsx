@@ -14,8 +14,13 @@ import { LogoUploader } from "./logo-uploader";
 
 type Errors = Partial<Record<string, string>>;
 
-/** Business name, WhatsApp, address and details: shared by enlistment and the profile editor. */
+/** Business name, WhatsApp, email, address and details: shared by enlistment and the profile editor. */
 export function ProfileFields({ errors, vendor }: { errors: Errors; vendor?: VendorProfile }) {
+  const emailHint = !vendor
+    ? "We'll email you a 6-digit code to confirm it."
+    : vendor.email
+      ? "Password reset codes are sent here."
+      : "Add an email so you can reset a forgotten password.";
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="Business name" htmlFor="business_name" error={errors.business_name}>
@@ -34,7 +39,11 @@ export function ProfileFields({ errors, vendor }: { errors: Errors; vendor?: Ven
         label="WhatsApp number"
         htmlFor="whatsapp"
         error={errors.whatsapp}
-        hint="Pro Gift will message you here about prices."
+        hint={
+          vendor
+            ? "Also your sign-in ID: after changing it, sign in with the new number."
+            : "This is your sign-in ID. Pro Gift will also message you here about prices."
+        }
       >
         <input
           id="whatsapp"
@@ -47,6 +56,20 @@ export function ProfileFields({ errors, vendor }: { errors: Errors; vendor?: Ven
           defaultValue={vendor ? formatWhatsAppNumber(vendor.whatsapp) : undefined}
           className={controlClass}
           {...errorProps("whatsapp", errors.whatsapp)}
+        />
+      </Field>
+      <Field label="Email" htmlFor="email" error={errors.email} hint={emailHint} className="sm:col-span-2">
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          maxLength={254}
+          autoComplete="email"
+          placeholder="name@company.com"
+          defaultValue={vendor?.email ?? undefined}
+          className={controlClass}
+          {...errorProps("email", errors.email)}
         />
       </Field>
       <Field label="Address" htmlFor="address" error={errors.address} className="sm:col-span-2">

@@ -76,6 +76,8 @@ async function VendorList() {
                   {!vendor.isActive && <Badge variant="outline">Disabled</Badge>}
                 </span>
                 <span className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                  <span>{formatWhatsAppNumber(vendor.whatsapp)}</span>
+                  {vendor.email && <span className="truncate">{vendor.email}</span>}
                   <span className="font-mono">{vendor.code}</span>
                   <span>
                     {vendor.productCount} {vendor.productCount === 1 ? "product" : "products"}
