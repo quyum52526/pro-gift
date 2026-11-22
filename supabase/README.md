@@ -35,6 +35,31 @@ It lets one product appear in several categories:
 Then run [`migrations/20261106000000_pro_gift_gift_box_availability.sql`](migrations/20261106000000_pro_gift_gift_box_availability.sql).
 It adds `products.available_for_gift_box` (default `true`), which decides whether `/gift-box` offers a product as an item to put inside a box. Products listed only under box or packaging categories start as `false`. Admins change it with the "Available in Gift Box Builder" checkbox.
 
+Then run [`migrations/20261122000000_pro_gift_vendors.sql`](migrations/20261122000000_pro_gift_vendors.sql).
+It adds the private vendor portal (`/vendor`) and the admin vendor pages (`/admin/vendors`, `/admin/vendors/search`):
+
+| Object | Purpose |
+|---|---|
+| `vendors` | One row per enlisted vendor: vendor ID (`PGV-XXXXXX`), business name, logo path, address, WhatsApp digits, details, `is_active`. |
+| `vendor_products` | A vendor's products: name, optional SKU, description, `price_min`–`price_max`, MOQ, specs and images (storage paths). |
+| `vendor_credentials` | bcrypt password hash and failed-sign-in counter. Kept apart so admin reads of `vendors` never include it. |
+| `vendor_sessions` | SHA-256 hashes of vendor session tokens (30 days). |
+| `vendor_upload_tickets` | One per upload; its id is the storage folder, proving which vendor uploaded a file. |
+| `pro_gift_vendor_*()` | The only way vendors read or write: register, login, logout, me, update profile, change password, list / save / delete products, issue upload ticket. Each resolves the session token itself. |
+| `pro_gift_admin_search_vendor_products()` | Pro Product Search for admins: all words must match product name, code, description, vendor name or vendor ID. |
+| `vendor-images` bucket | Public by exact URL, never listed. Anonymous uploads only into a folder named after a valid, unexpired upload ticket; admins can update or delete. |
+
+Privacy: no table has a policy for `anon`, so the storefront and anyone holding the anon key cannot list vendors or their products. Admins (from `admin_users`) read them directly under RLS, without a vendor password. `/vendor` is `noindex` and disallowed in `robots.txt`.
+
+Vendors aren't Supabase Auth users, so enlisting creates nothing under **Authentication → Users**, and the "Allow new users to sign up" setting doesn't affect them. Five wrong passwords pause a vendor's sign-in for 15 minutes. To reset a vendor's password, run in the SQL Editor:
+
+```sql
+update public.vendor_credentials
+set password_hash = extensions.crypt('<new password>', extensions.gen_salt('bf', 10)),
+    failed_attempts = 0, locked_until = null
+where vendor_id = (select id from public.vendors where code = 'PGV-XXXXXX');
+```
+
 Deploy the app version that reads `product_categories` together with these migrations: once the table exists, older app code that embeds `categories(...)` directly gets an "ambiguous relationship" error from the API.
 
 Each migration runs in one transaction. If it fails part-way, nothing is created and it can be re-run.

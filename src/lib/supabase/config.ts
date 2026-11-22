@@ -15,3 +15,9 @@ export const PRODUCT_IMAGES_BUCKET = "product-images";
 
 /** Public URL prefix of every file in the product image bucket. */
 export const PRODUCT_IMAGES_PUBLIC_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/`;
+
+/** Private-by-URL bucket for vendor logos and vendor product photos. */
+export const VENDOR_IMAGES_BUCKET = "vendor-images";
+
+/** Public URL prefix of every file in the vendor image bucket. */
+export const VENDOR_IMAGES_PUBLIC_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${VENDOR_IMAGES_BUCKET}/`;

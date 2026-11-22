@@ -4,7 +4,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, ImagePlus, Loader2, Star, Trash2, TriangleAlert } from "lucide-react";
 
 import { discardUploadedImage, uploadProductImage } from "@/app/admin/products/actions";
-import { ACCEPTED_IMAGE_TYPES, MAX_IMAGES, MAX_IMAGE_BYTES } from "@/lib/admin/form-state";
+import { ACCEPTED_IMAGE_TYPES, MAX_IMAGES, MAX_IMAGE_BYTES, type UploadResult } from "@/lib/admin/form-state";
 import type { StoredImage } from "@/lib/catalog/types";
 import { cn } from "@/lib/utils";
 import { controlClass } from "./field";
@@ -23,11 +23,22 @@ interface ImageUploaderProps {
   /** Lets the form block submit while files are still uploading. */
   onBusyChange: (busy: boolean) => void;
   invalid?: boolean;
+  /** Server Action that stores one file. Defaults to the admin product bucket. */
+  uploadAction?: (formData: FormData) => Promise<UploadResult>;
+  /** Deletes a file removed before saving; null when the uploader may not delete. */
+  discardAction?: ((path: string) => Promise<void>) | null;
 }
 
 let nextKey = 0;
 
-export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUploaderProps) {
+export function ImageUploader({
+  name,
+  initial,
+  onBusyChange,
+  invalid,
+  uploadAction = uploadProductImage,
+  discardAction = discardUploadedImage,
+}: ImageUploaderProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [items, setItems] = React.useState<Item[]>(() =>
     initial.map((image) => ({ ...image, key: `img-${nextKey++}`, status: "ready" })),
@@ -68,7 +79,7 @@ export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUpl
       if (item.status === "error") continue;
       const body = new FormData();
       body.append("file", file);
-      const result = await uploadProductImage(body).catch(() => ({
+      const result = await uploadAction(body).catch(() => ({
         ok: false as const,
         error: "Upload failed. Check your connection.",
       }));
@@ -84,7 +95,7 @@ export function ImageUploader({ name, initial, onBusyChange, invalid }: ImageUpl
   const remove = (item: Item) => {
     setItems((current) => current.filter((i) => i.key !== item.key));
     if (item.src.startsWith("blob:")) URL.revokeObjectURL(item.src);
-    if (item.isNew && item.path) void discardUploadedImage(item.path);
+    if (item.isNew && item.path && discardAction) void discardAction(item.path);
   };
 
   const move = (index: number, delta: number) =>

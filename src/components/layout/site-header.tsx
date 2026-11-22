@@ -53,6 +53,14 @@ export async function SiteHeader() {
             >
               Contact
             </Link>
+            {/* Vendor enlistment and sign-in. Phones reach it from the menu. */}
+            <Link
+              href="/vendor"
+              rel="nofollow"
+              className="hidden px-2 text-xs leading-4 font-semibold tracking-[0.08em] text-ink uppercase transition-colors hover:text-teal sm:inline-flex"
+            >
+              Vendor
+            </Link>
             {/* No room beside the logo on phones; the home page band links here instead. */}
             <Link href="/gift-box" className="pg-btn pg-btn-line hidden md:inline-flex">
               Build a gift box
