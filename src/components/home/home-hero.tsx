@@ -17,7 +17,7 @@ export function HomeHero({ products }: { products: Product[] }) {
           Pro Gift
         </p>
         <h1 className="pg-rise text-[clamp(40px,6.4vw,56px)] leading-[1.07] font-extrabold text-ink" style={delay(0.35)}>
-          Premium corporate <span className="pg-hl">gifts</span>
+          Corporate Gift Shop in <span className="pg-hl">Dhaka</span>
         </h1>
         <p className="pg-rise max-w-[480px] text-lg leading-7 text-ink" style={delay(0.5)}>
           Branded with your logo, delivered across Bangladesh. Request a quote on WhatsApp.

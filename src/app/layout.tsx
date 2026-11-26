@@ -81,7 +81,8 @@ const STORE_JSON_LD = {
   url: SITE_CONTACT.website.href,
   logo: absoluteUrl("/brand/icon-512.png"),
   image: absoluteUrl(DEFAULT_OG_IMAGE.url),
-  description: DEFAULT_DESCRIPTION,
+  description:
+    "Corporate gift shop in Dhaka for custom logo-branded gifts: leather gifts, diaries, crests and awards, desk sets, tech gifts and gift boxes. Bulk orders, delivery across Bangladesh and quotes on WhatsApp.",
   telephone: SITE_CONTACT.phone.label,
   email: SITE_CONTACT.email,
   address: {
