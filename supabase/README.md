@@ -83,6 +83,18 @@ select public.pro_gift_vendor_rotate_app_secret();
 
 and copy the returned value into `VENDOR_SERVER_SECRET` (`.env.local` and Vercel). Running it again replaces the secret, so update the env var each time. Also set `RESEND_API_KEY` and `RESEND_FROM_EMAIL` (see section 3).
 
+Then run [`migrations/20261127000000_pro_gift_admin_create_vendor_password_otp.sql`](migrations/20261127000000_pro_gift_admin_create_vendor_password_otp.sql).
+Admins can create vendors from `/admin/vendors/new`, and vendors confirm a password change with an email code. Additive only; existing vendors, products and passwords are kept, and it is safe to re-run:
+
+| Object | Purpose |
+|---|---|
+| `pro_gift_admin_create_vendor()` | Admins only (`pro_gift_is_admin()`, `authenticated` role). Creates the vendor and password with no email code; an email entered by the admin is saved as verified. Can return an upload ticket so the logo goes into the vendor's own `vendor-images` folder. |
+| `vendor_email_otps.purpose` | Also accepts `password_change`. |
+| `pro_gift_vendor_change_password_start/_complete()` | `/vendor/profile`: code emailed to the account's address → code + new password; every other session is signed out. Vendors without an email are asked to add one first. |
+| `pro_gift_vendor_change_password()` | Kept, but no longer callable through the API, so the email code can't be skipped. |
+
+Public enlisting on `/vendor` is unchanged and still needs an email code. Deploy the app code from the same commit right after running it: the old password form calls the function that is no longer callable.
+
 Deploy the app version that reads `product_categories` together with these migrations: once the table exists, older app code that embeds `categories(...)` directly gets an "ambiguous relationship" error from the API.
 
 Each migration runs in one transaction. If it fails part-way, nothing is created and it can be re-run.

@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Store, Users } from "lucide-react";
+import { ChevronRight, Plus, Store, Users } from "lucide-react";
 
 import { VendorSearchForm } from "@/components/admin/vendor-search-form";
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin/auth";
 import { listVendors } from "@/lib/vendor/queries";
 import { buildVendorContactUrl, formatWhatsAppNumber } from "@/lib/vendor/whatsapp";
@@ -15,11 +16,18 @@ export const metadata: Metadata = { title: "Vendors" };
 export default function AdminVendorsPage() {
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-ink">Vendors</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Every enlisted vendor. Open one to see their profile and products; no vendor password needed.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Vendors</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every enlisted vendor. Open one to see their profile and products; no vendor password needed.
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/admin/vendors/new">
+            <Plus className="h-4 w-4" aria-hidden /> Create vendor
+          </Link>
+        </Button>
       </div>
       <div className="mt-5">
         <VendorSearchForm />
@@ -41,7 +49,7 @@ async function VendorList() {
         <Users className="h-8 w-8 text-gold-deep" aria-hidden />
         <p className="font-medium text-ink">No vendors yet</p>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Vendors enlist from the &quot;Vendor&quot; link in the site header (/vendor).
+          Vendors enlist from the &quot;Vendor&quot; link in the site header (/vendor), or use &quot;Create vendor&quot;.
         </p>
       </div>
     );

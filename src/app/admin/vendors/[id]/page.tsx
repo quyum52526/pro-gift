@@ -9,11 +9,12 @@ import { VendorProfileHeader } from "@/components/vendor/vendor-profile-header";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getVendorWithProducts } from "@/lib/vendor/queries";
+import { formatWhatsAppNumber } from "@/lib/vendor/whatsapp";
 import { setVendorActive } from "../actions";
 
 export const metadata: Metadata = { title: "Vendor" };
 
-export default function AdminVendorPage({ params }: PageProps<"/admin/vendors/[id]">) {
+export default function AdminVendorPage({ params, searchParams }: PageProps<"/admin/vendors/[id]">) {
   return (
     <>
       <Link
@@ -23,21 +24,30 @@ export default function AdminVendorPage({ params }: PageProps<"/admin/vendors/[i
         <ArrowLeft className="h-4 w-4" aria-hidden /> All vendors
       </Link>
       <Suspense fallback={<div className="h-48 animate-pulse rounded-2xl border bg-surface" aria-busy="true" />}>
-        <VendorDetail params={params} />
+        <VendorDetail params={params} searchParams={searchParams} />
       </Suspense>
     </>
   );
 }
 
-async function VendorDetail({ params }: Pick<PageProps<"/admin/vendors/[id]">, "params">) {
+async function VendorDetail({ params, searchParams }: PageProps<"/admin/vendors/[id]">) {
   const admin = await requireAdmin();
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const created = query.created === "1";
+  const logoFailed = query.logo === "failed";
   const result = await getVendorWithProducts(admin, id);
   if (!result) notFound();
   const { vendor, products } = result;
 
   return (
     <div className="flex flex-col gap-6">
+      {created && (
+        <p role="status" className="rounded-xl border border-teal/30 bg-surface-tint px-4 py-3 text-sm text-ink">
+          Vendor created. They can sign in at /vendor with {formatWhatsAppNumber(vendor.whatsapp)} and the password
+          you set.
+          {logoFailed && " The logo couldn't be uploaded; the vendor can add it from their profile."}
+        </p>
+      )}
       <VendorProfileHeader
         vendor={vendor}
         productCount={products.length}

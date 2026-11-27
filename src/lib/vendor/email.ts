@@ -14,7 +14,7 @@ export function getVendorServerSecret(): string | null {
 export const OTP_SETUP_MISSING =
   "Email codes aren't set up on this site yet. Please message Pro Gift on WhatsApp and we'll help.";
 
-export type OtpPurpose = "signup" | "reset";
+export type OtpPurpose = "signup" | "reset" | "password_change";
 
 const COPY: Record<OtpPurpose, { subject: string; intro: string }> = {
   signup: {
@@ -24,6 +24,10 @@ const COPY: Record<OtpPurpose, { subject: string; intro: string }> = {
   reset: {
     subject: `Reset your ${SITE_NAME} vendor password`,
     intro: "Use this code to set a new password for your vendor account:",
+  },
+  password_change: {
+    subject: `Confirm your ${SITE_NAME} vendor password change`,
+    intro: "Use this code to confirm the new password for your vendor account:",
   },
 };
 

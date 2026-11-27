@@ -383,24 +383,92 @@ export async function updateVendorProfile(_prev: ActionState, formData: FormData
   redirect(`${VENDOR_HOME_PATH}?saved=profile`);
 }
 
-export async function changeVendorPassword(_prev: ActionState, formData: FormData): Promise<ActionState> {
+/** Masks an address for display: "rahim@company.com" → "ra•••@company.com". */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  return `${local.slice(0, 2)}•••@${domain}`;
+}
+
+/** Change password, step 1: email a code to the address on the signed-in vendor's account. */
+export async function startVendorPasswordChange(prev: OtpStartState, formData: FormData): Promise<OtpStartState> {
   const token = await getVendorToken();
   if (!token) return SIGNED_OUT;
 
-  const current = String(formData.get("current_password") ?? "");
-  const next = parsePassword(formData, "new_password");
-  if (!next) return { status: "error", fieldErrors: { new_password: "Use 8–72 characters." } };
-  if (formData.get("new_password_confirm") !== next) {
-    return { status: "error", fieldErrors: { new_password_confirm: "Passwords don't match." } };
+  const keep = stayOnCodeStep(prev, formData);
+  const secret = getVendorServerSecret();
+  if (!secret) {
+    console.error("[vendor] VENDOR_SERVER_SECRET is not set; can't send password-change codes.");
+    return { status: "error", message: OTP_SETUP_MISSING, ...keep };
   }
 
-  const { data, error } = await createPublicClient().rpc("pro_gift_vendor_change_password", {
+  const { data, error } = await createPublicClient()
+    .rpc("pro_gift_vendor_change_password_start", { p_secret: secret, p_token: token })
+    .single<{ status: string; request_id: string | null; otp_code: string | null; email: string | null }>();
+  if (error || !data) {
+    return { status: "error", message: otpSetupError(error ?? { message: "no row" }, "Password change start"), ...keep };
+  }
+
+  if (data.status === "signed_out") return SIGNED_OUT;
+  if (data.status === "no_email") {
+    return {
+      status: "error",
+      message: "Add an email address to your business profile above and save it first. We send the code there.",
+    };
+  }
+  if (data.status === "wait") {
+    return { status: "error", message: "We just sent a code. Wait a minute before asking for another.", ...keep };
+  }
+  if (data.status !== "ok" || !data.request_id || !data.otp_code || !data.email) {
+    return { status: "error", message: "Too many codes were requested. Try again in an hour.", ...keep };
+  }
+
+  const sent = await sendVendorOtpEmail(data.email, data.otp_code, "password_change");
+  if (!sent.ok) return { status: "error", message: sent.error, ...keep };
+
+  const masked = maskEmail(data.email);
+  return {
+    status: "success",
+    step: "code",
+    requestId: data.request_id,
+    email: masked,
+    message: codeSentMessage(masked, sent.devFallback),
+  };
+}
+
+/** Change password, step 2: right code → new password; other devices are signed out, this one stays in. */
+export async function completeVendorPasswordChange(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const token = await getVendorToken();
+  if (!token) return SIGNED_OUT;
+
+  const requestId = parseRequestId(formData);
+  const code = parseOtpCode(formData);
+  const next = parsePassword(formData, "new_password");
+  const fieldErrors: Partial<Record<string, string>> = {};
+  if (!code) fieldErrors.otp = "Enter the 6-digit code from the email.";
+  if (!next) fieldErrors.new_password = "Use 8–72 characters.";
+  else if (formData.get("new_password_confirm") !== next) fieldErrors.new_password_confirm = "Passwords don't match.";
+  if (!requestId) return { status: "error", message: "This code has expired. Send a new code." };
+  if (Object.keys(fieldErrors).length > 0) return { status: "error", fieldErrors };
+
+  const secret = getVendorServerSecret();
+  if (!secret) return { status: "error", message: OTP_SETUP_MISSING };
+
+  const { data, error } = await createPublicClient().rpc("pro_gift_vendor_change_password_complete", {
+    p_secret: secret,
     p_token: token,
-    p_current_password: current,
+    p_request_id: requestId,
+    p_code: code,
     p_new_password: next,
   });
-  if (error) return { status: "error", message: error.message };
-  if (data !== true) return { status: "error", fieldErrors: { current_password: "Current password is incorrect." } };
+  if (error) return { status: "error", message: otpSetupError(error, "Password change") };
+
+  if (data === "signed_out") return SIGNED_OUT;
+  if (data === "invalid") {
+    return { status: "error", fieldErrors: { otp: "That code isn't right. Check the email and try again." } };
+  }
+  if (data !== "ok") {
+    return { status: "error", message: "This code has expired or was tried too many times. Send a new code." };
+  }
   return { status: "success", message: "Password changed. Other devices were signed out." };
 }
 
