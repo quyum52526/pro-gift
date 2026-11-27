@@ -50,8 +50,8 @@ export default function CategoryPage({ params }: PageProps<"/category/[slug]">) 
     <main className="flex-1">
       <Suspense
         fallback={
-          <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 sm:px-6">
-            <CatalogGridSkeleton />
+          <div className="mx-auto w-full max-w-[1200px] px-4 pt-3 pb-16 sm:px-6 md:pt-4">
+            <CatalogGridSkeleton className="mt-4" />
           </div>
         }
       >
@@ -99,9 +99,9 @@ async function CategoryContent({ params }: { params: Promise<{ slug: string }> }
         />
       ))}
 
-      <div className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-16 sm:px-6 md:pt-8">
+      <div className="mx-auto w-full max-w-[1200px] px-4 pt-3 pb-16 sm:px-6 md:pt-4">
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center text-sm text-muted-foreground">
+          <ol className="flex items-center text-xs text-muted-foreground sm:text-sm">
             <li className="flex items-center">
               <Link href="/" className="transition-colors hover:text-teal">
                 Home
@@ -116,23 +116,36 @@ async function CategoryContent({ params }: { params: Promise<{ slug: string }> }
           </ol>
         </nav>
 
-        <header className="mt-6 flex max-w-[820px] flex-col items-start gap-5">
-          <h1 className="text-[clamp(28px,4.2vw,40px)] leading-[1.2] font-bold text-ink">{content.h1}</h1>
-          <p className="text-base leading-7 text-muted-foreground">{content.intro}</p>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pg-btn mt-1 bg-whatsapp text-surface shadow-[0_5px_0_var(--color-whatsapp-dark)] hover:shadow-[0_8px_0_var(--color-whatsapp-dark)]"
-          >
-            <WhatsAppIcon className="size-5" />
-            Get a quote on WhatsApp
-          </a>
+        {/* Kept short so the first row of products shows without scrolling; the full copy sits below the grid. */}
+        <header className="mt-2 flex max-w-[980px] flex-col gap-1">
+          <h1 className="text-[clamp(22px,3vw,32px)] leading-[1.2] font-bold text-ink">{content.h1}</h1>
+          <p className="line-clamp-2 text-sm leading-6 text-muted-foreground md:text-base">{content.summary}</p>
         </header>
 
-        <CatalogGrid products={items} heading={category.name} />
+        <CatalogGrid products={items} heading={category.name} className="mt-4" />
 
-        <section aria-labelledby="category-faq" className="mt-14 max-w-[820px]">
+        <section
+          aria-labelledby="category-about"
+          className="mt-12 rounded-3xl border border-hairline bg-surface-tint p-6 sm:p-8 md:mt-14 md:p-10"
+        >
+          <div className="max-w-[820px]">
+            <h2 id="category-about" className="text-xl font-bold text-ink">
+              About our {category.name.toLowerCase()}
+            </h2>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">{content.intro}</p>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pg-btn mt-6 bg-whatsapp text-surface shadow-[0_5px_0_var(--color-whatsapp-dark)] hover:shadow-[0_8px_0_var(--color-whatsapp-dark)]"
+            >
+              <WhatsAppIcon className="size-5" />
+              Get a quote on WhatsApp
+            </a>
+          </div>
+        </section>
+
+        <section aria-labelledby="category-faq" className="mt-12 max-w-[820px] md:mt-14">
           <h2 id="category-faq" className="text-xl font-bold text-ink">
             Frequently asked questions
           </h2>

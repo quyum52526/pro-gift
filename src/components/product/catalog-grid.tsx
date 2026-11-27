@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
 import { categoryHref } from "@/lib/catalog/category-filter";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/product";
 import { ProductCard } from "./product-card";
@@ -10,12 +11,14 @@ interface CatalogGridProps {
   products: Product[];
   /** Grid heading: "All Gifts" on the home page, the category name on a category page. */
   heading?: string;
+  /** Overrides the default top margin (category pages sit the grid tighter under the title). */
+  className?: string;
 }
 
 /** Product grid. Category pages pass their own products; the home page passes all of them. */
-export function CatalogGrid({ products, heading = "All Gifts" }: CatalogGridProps) {
+export function CatalogGrid({ products, heading = "All Gifts", className }: CatalogGridProps) {
   return (
-    <section aria-labelledby="catalog-heading" className="mt-8">
+    <section aria-labelledby="catalog-heading" className={cn("mt-8", className)}>
       <div className="flex items-baseline justify-between gap-4">
         <h2 id="catalog-heading" className="text-lg font-semibold text-ink">
           {heading}
@@ -48,9 +51,9 @@ export function CatalogGrid({ products, heading = "All Gifts" }: CatalogGridProp
 }
 
 /** Loading shell for the catalogue grid. */
-export function CatalogGridSkeleton() {
+export function CatalogGridSkeleton({ className }: { className?: string }) {
   return (
-    <div className="mt-8 animate-pulse" aria-busy="true" aria-label="Loading products">
+    <div className={cn("mt-8 animate-pulse", className)} aria-busy="true" aria-label="Loading products">
       <div className="flex items-baseline justify-between">
         <div className="h-6 w-40 rounded bg-surface-tint" />
         <div className="h-4 w-20 rounded bg-surface-tint" />
