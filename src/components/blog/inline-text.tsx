@@ -6,6 +6,11 @@ const TOKEN = /\[([^\]]+)\]\(([^)\s]+)\)|\*\*(.+?)\*\*/g;
 
 const LINK_CLASS = "font-semibold text-teal underline underline-offset-2 transition-colors hover:text-ink";
 
+/** The same text with link and bold markup removed, for JSON-LD and other plain-text uses. */
+export function plainText(text: string): string {
+  return text.replace(TOKEN, (_whole, linkText?: string, _href?: string, boldText?: string) => linkText ?? boldText ?? "");
+}
+
 /** Renders blog text with inline links and bold. Internal links ("/…") use next/link. */
 export function InlineText({ text }: { text: string }) {
   const nodes: ReactNode[] = [];

@@ -1,4 +1,5 @@
 import employeeClientGiftsBangla from "./corporate-gift-ideas-employees-clients-bangla";
+import corporateGiftShopDhaka from "./corporate-gift-shop-in-dhaka-guide";
 import howToOrderBrandedGifts from "./how-to-order-logo-branded-corporate-gifts-bangladesh";
 import type { BlogLang, BlogPost } from "./types";
 import yearEndGiftIdeas from "./year-end-new-year-corporate-gift-ideas-bangladesh";
@@ -6,7 +7,7 @@ import yearEndGiftIdeas from "./year-end-new-year-corporate-gift-ideas-banglades
 export type { BlogBlock, BlogFaq, BlogLang, BlogPost } from "./types";
 
 // Register each article file here, newest first: same-day posts keep this order.
-const POSTS: BlogPost[] = [employeeClientGiftsBangla, howToOrderBrandedGifts, yearEndGiftIdeas];
+const POSTS: BlogPost[] = [corporateGiftShopDhaka, employeeClientGiftsBangla, howToOrderBrandedGifts, yearEndGiftIdeas];
 
 /** All articles, newest first. */
 export function getAllPosts(): BlogPost[] {

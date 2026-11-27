@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import { getCategories } from "@/data/products";
-import { InlineText } from "@/components/blog/inline-text";
+import { InlineText, plainText } from "@/components/blog/inline-text";
 import { WhatsAppIcon } from "@/components/product/whatsapp-icon";
 import {
   type BlogBlock,
@@ -63,8 +63,9 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const path = blogHref(post.slug);
   // Social sites reject SVG previews, so SVG covers fall back to the default share image.
   const shareImage = isSvgCover(post.coverImage) ? DEFAULT_OG_IMAGE : { url: post.coverImage, alt: post.coverAlt };
+  const metaTitle = post.metaTitle ?? post.title;
   return {
-    title: post.title,
+    title: post.metaTitle ? { absolute: post.metaTitle } : post.title,
     description: post.metaDescription,
     alternates: { canonical: path },
     authors: [{ name: AUTHOR }],
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
       ...OPEN_GRAPH_DEFAULTS,
       ...(postLang(post) === "bn" && { locale: "bn_BD" }),
       type: "article",
-      title: post.title,
+      title: metaTitle,
       description: post.metaDescription,
       url: path,
       publishedTime: post.publishedAt,
@@ -82,7 +83,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
+      title: metaTitle,
       description: post.metaDescription,
       images: [shareImage],
     },
@@ -148,7 +149,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
   };
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: post.title,
     description: post.metaDescription,
     image: [absoluteUrl(post.coverImage)],
@@ -170,7 +171,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
         mainEntity: post.faqs.map((faq) => ({
           "@type": "Question",
           name: faq.question,
-          acceptedAnswer: { "@type": "Answer", text: faq.answer },
+          acceptedAnswer: { "@type": "Answer", text: plainText(faq.answer) },
         })),
       }
     : null;
@@ -260,7 +261,9 @@ export default async function BlogPostPage({ params }: PageProps<"/blog/[slug]">
                 {post.faqs.map((faq) => (
                   <div key={faq.question} className="rounded-2xl bg-surface-tint p-5">
                     <dt className="font-semibold text-ink">{faq.question}</dt>
-                    <dd className="mt-2 text-sm leading-6 text-muted-foreground">{faq.answer}</dd>
+                    <dd className="mt-2 text-sm leading-6 text-muted-foreground">
+                      <InlineText text={faq.answer} />
+                    </dd>
                   </div>
                 ))}
               </dl>

@@ -21,6 +21,8 @@ export interface BlogPost {
   /** Article language. Defaults to "en". */
   lang?: BlogLang;
   title: string;
+  /** Full <title> tag when it should differ from the H1; used as-is, without the site-name suffix. */
+  metaTitle?: string;
   /** 150-160 characters. */
   metaDescription: string;
   /** Shown on the /blog list. */
