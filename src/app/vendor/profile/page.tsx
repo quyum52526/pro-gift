@@ -24,7 +24,7 @@ async function ProfileEditor() {
   return (
     <div className="flex flex-col gap-8">
       <VendorProfileForm vendor={vendor} />
-      <VendorPasswordForm />
+      <VendorPasswordForm email={vendor.email} />
     </div>
   );
 }

@@ -4,13 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { Check, Loader2 } from "lucide-react";
 
-import { changeVendorPassword, updateVendorProfile } from "@/app/vendor/actions";
+import { completeVendorPasswordChange, startVendorPasswordChange, updateVendorProfile } from "@/app/vendor/actions";
 import { Field, FormSection, controlClass, errorProps } from "@/components/admin/field";
 import { Button } from "@/components/ui/button";
 import { IDLE_STATE } from "@/lib/admin/form-state";
 import type { VendorProfile } from "@/lib/vendor/types";
 import { formatWhatsAppNumber } from "@/lib/vendor/whatsapp";
 import { LogoUploader } from "./logo-uploader";
+import { CodeStepLinks, ErrorBanner, OtpField, SentBanner, useOtpStart } from "./otp-ui";
 
 type Errors = Partial<Record<string, string>>;
 
@@ -150,24 +151,102 @@ export function VendorProfileForm({ vendor }: { vendor: VendorProfile }) {
   );
 }
 
-export function VendorPasswordForm() {
-  const [state, formAction, pending] = React.useActionState(changeVendorPassword, IDLE_STATE);
-  const errors = state.fieldErrors ?? {};
+/**
+ * Change password with an email code: step 1 emails a code to the address on the
+ * account, step 2 takes the code and the new password.
+ */
+export function VendorPasswordForm({ email }: { email: string | null }) {
+  const { state, pending, formRef, onSubmit, onCode, resend, edit } = useOtpStart(startVendorPasswordChange);
+  const [done, setDone] = React.useState<string | null>(null);
+
   return (
-    <FormSection title="Password" description="Changing it signs you out on every other device.">
-      <form action={formAction} className="grid gap-4 sm:grid-cols-3">
-        <Field label="Current password" htmlFor="current_password" error={errors.current_password}>
-          <input
-            id="current_password"
-            name="current_password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className={controlClass}
-            {...errorProps("current_password", errors.current_password)}
+    <FormSection
+      title="Password"
+      description="We email a 6-digit code to confirm it's you. Changing it signs you out on every other device."
+    >
+      <div className="flex flex-col gap-4">
+        {done && (
+          <p role="status" className="inline-flex items-center gap-1 text-sm text-teal">
+            <Check className="h-4 w-4" aria-hidden /> {done}
+          </p>
+        )}
+        <form ref={formRef} onSubmit={onSubmit} noValidate className={onCode ? "hidden" : "flex flex-col gap-3"}>
+          {!onCode && state.status === "error" && <ErrorBanner message={state.message} />}
+          <p className="text-sm text-muted-foreground">
+            {email ? (
+              <>
+                The code goes to <span className="font-medium break-all text-ink">{email}</span>.
+              </>
+            ) : (
+              "Add an email address to your business profile above and save it. We send the code there."
+            )}
+          </p>
+          <div>
+            <Button type="submit" variant="outline" disabled={pending || !email} onClick={() => setDone(null)}>
+              {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+              Send verification code
+            </Button>
+          </div>
+        </form>
+
+        {onCode && state.requestId && (
+          <PasswordCodeStep
+            key={state.requestId}
+            requestId={state.requestId}
+            sentMessage={state.status === "success" ? state.message : undefined}
+            startError={state.status === "error" ? state.message : undefined}
+            resending={pending}
+            onResend={resend}
+            onCancel={edit}
+            onDone={(message) => {
+              setDone(message);
+              edit();
+            }}
           />
-        </Field>
-        <Field label="New password" htmlFor="new_password" error={errors.new_password}>
+        )}
+      </div>
+    </FormSection>
+  );
+}
+
+function PasswordCodeStep({
+  requestId,
+  sentMessage,
+  startError,
+  resending,
+  onResend,
+  onCancel,
+  onDone,
+}: {
+  requestId: string;
+  sentMessage?: string;
+  startError?: string;
+  resending: boolean;
+  onResend: () => void;
+  onCancel: () => void;
+  onDone: (message: string) => void;
+}) {
+  const [state, formAction, pending] = React.useActionState(completeVendorPasswordChange, IDLE_STATE);
+  const errors = state.fieldErrors ?? {};
+
+  React.useEffect(() => {
+    if (state.status === "success") onDone(state.message ?? "Password changed.");
+  }, [state, onDone]);
+
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    React.startTransition(() => formAction(formData));
+  };
+
+  return (
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+      <SentBanner message={sentMessage} />
+      <ErrorBanner message={startError ?? (state.status === "error" ? state.message : undefined)} />
+      <input type="hidden" name="request_id" value={requestId} />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <OtpField error={errors.otp} />
+        <Field label="New password" htmlFor="new_password" error={errors.new_password} hint="8 characters or more.">
           <input
             id="new_password"
             name="new_password"
@@ -191,21 +270,14 @@ export function VendorPasswordForm() {
             {...errorProps("new_password_confirm", errors.new_password_confirm)}
           />
         </Field>
-        <div className="flex items-center justify-end gap-3 sm:col-span-3">
-          <p aria-live="polite" className="mr-auto text-sm">
-            {state.status === "success" && (
-              <span className="inline-flex items-center gap-1 text-teal">
-                <Check className="h-4 w-4" aria-hidden /> {state.message}
-              </span>
-            )}
-            {state.status === "error" && state.message && <span className="text-red-700">{state.message}</span>}
-          </p>
-          <Button type="submit" variant="outline" disabled={pending}>
-            {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-            Change password
-          </Button>
-        </div>
-      </form>
-    </FormSection>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <CodeStepLinks onResend={onResend} onEdit={onCancel} resending={resending} editLabel="Cancel" />
+        <Button type="submit" disabled={pending}>
+          {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+          Change password
+        </Button>
+      </div>
+    </form>
   );
 }

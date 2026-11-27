@@ -99,6 +99,51 @@ export function parseVendorProfileForm(
   };
 }
 
+export interface AdminVendorInput {
+  business_name: string;
+  whatsapp: string;
+  /** Empty when the admin leaves it out. */
+  email: string;
+  address: string;
+  description: string;
+  password: string;
+}
+
+/** Admin "Create vendor" form. Email, address and details are optional; no email code is sent. */
+export function parseAdminVendorForm(
+  formData: FormData,
+): { ok: true; data: AdminVendorInput } | { ok: false; fieldErrors: FieldErrors } {
+  const fieldErrors: FieldErrors = {};
+
+  const business_name = text(formData, "business_name");
+  if (business_name.length < 2 || business_name.length > 120) {
+    fieldErrors.business_name = "Business name must be 2–120 characters.";
+  }
+
+  const whatsapp = normalizeWhatsAppNumber(text(formData, "whatsapp"));
+  if (!whatsapp) fieldErrors.whatsapp = "Enter a WhatsApp number, e.g. 01712-345678 or +8801712345678.";
+
+  const rawEmail = text(formData, "email");
+  const email = rawEmail ? parseEmail(rawEmail) : "";
+  if (email === null) fieldErrors.email = "Enter a valid email address, or leave it empty.";
+
+  const address = text(formData, "address");
+  if (address.length > 300) fieldErrors.address = "Keep the address under 300 characters.";
+
+  const description = text(formData, "description");
+  if (description.length > 2000) fieldErrors.description = "Keep the details under 2000 characters.";
+
+  const password = parsePassword(formData);
+  if (!password) fieldErrors.password = "Use 8–72 characters.";
+  else if (formData.get("password_confirm") !== password) fieldErrors.password_confirm = "Passwords don't match.";
+
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };
+  return {
+    ok: true,
+    data: { business_name, whatsapp: whatsapp!, email: email!, address, description, password: password! },
+  };
+}
+
 export function parsePassword(formData: FormData, key = "password"): string | null {
   const value = formData.get(key);
   return typeof value === "string" && value.length >= 8 && value.length <= 72 ? value : null;
